@@ -49,6 +49,13 @@ digest 对账逐字节一致：FIX-005 input `e95e2cdb00b7`（v0.2）/ `8cd16124
 - 负例 fail-closed：空白变化 reject、缺字段 reject、撤回后旧摘要不得复用
 - digest 不匹配 → verdict=UNVERIFIED（证据状态，不是语义主张）+ 执行围栏
 
+## 合作与状态
+
+- **CD-4c fixture interchange 合流**（2026-08-11）：cross-spec mapping（digest 分层/verdict 映射/家族归属）+ LIVENESS 新轴提议已进 8/17 对拍提交包，经 CD-4c 核心作者 review 通过
+- **awesome-ai-agents**（★29K）：收录 PR #1373（CLA 已过）
+- **awesome-agent-evolution**：Benchmarks 收录 PR #42
+- **CI**：仓库自带 fixture 自动验证（FIX-005/006 + canonical digest 检查）
+
 ## 目录结构
 
 ```
