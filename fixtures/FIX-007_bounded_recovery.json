@@ -1,0 +1,67 @@
+{
+  "fixture_id": "FIX-007_bounded_recovery",
+  "version": "0.1-draft",
+  "family": "safety (bounded recovery)",
+  "depends_on": ["FIX-005_aging_and_digest", "FIX-006_promote_after_aging_boundary"],
+  "co_defined_with": "凯瑞's Agent (bounded-recovery fixtures 提议), 小花花 (RECALL 边界), OpenClaw (CD-4c interchange)",
+  "date": "2026-08-11",
+  "manifest": {
+    "goal": "验证记忆/状态系统在故障后的有界恢复（bounded recovery）：恢复必须在明确边界内完成，恢复期间不可见部分状态（fail-closed），恢复完成必须可验证（receipt），恢复失败不得静默降级",
+    "atoms": [
+      {"atom_id": "r1", "kind": "ephemeral", "content": "recovery-probe-a", "reference_count": 1, "bucket": "24h"},
+      {"atom_id": "r2", "kind": "durable", "content": "recovery-probe-b", "reference_count": 3, "bucket": "durable"},
+      {"atom_id": "r3", "kind": "tombstoned", "content": "withdrawn-during-outage", "reference_count": 0, "retraction_reason": "AUTHORITY_REVOKED"}
+    ],
+    "journal": [],
+    "authority_epoch": 200,
+    "failure_injection": {
+      "type": "storage_partial_corruption",
+      "affected": ["r1"],
+      "corruption": "bucket metadata flipped (24h->1h)",
+      "detected_at_epoch": 201
+    }
+  },
+  "events": [
+    {"type": "tick", "payload": {"tick_offset": 1}, "expect": "normal operation, no recovery needed"},
+    {"type": "inject_failure", "payload": {"epoch": 201, "target": "r1"}, "expect": "failure detected, system enters RECOVERY state (fail-closed: r1 unavailable for recall)"},
+    {"type": "recall", "payload": {"query": "recovery-probe-a", "tick_offset": 201}, "expect": "r1 NOT recallable during recovery (fail-closed), r2/r3 unaffected"},
+    {"type": "recall", "payload": {"query": "withdrawn-during-outage", "tick_offset": 201}, "expect": "r3 still tombstone-blocked (retraction survives outage)"},
+    {"type": "recover", "payload": {"epoch": 202, "strategy": "rebuild_from_journal", "scope": "r1"}, "expect": "recovery completes within bounded time/epochs; r1 restored with CORRECT bucket (24h, not corrupted 1h)"},
+    {"type": "recall", "payload": {"query": "recovery-probe-a", "tick_offset": 203}, "expect": "r1 recallable again (recovered), digest identity unchanged (atom_id+content+initial_kind)"},
+    {"type": "verify_recovery", "payload": {"epoch": 203}, "expect": "recovery receipt emitted: {corruption_detected, recovery_strategy, restored_atoms, digest_unchanged, bounded: true}"}
+  ],
+  "oracle": {
+    "expected_retrieval_set": {
+      "during_recovery": {"query": "recovery-probe-a", "default_recall": [], "note": "fail-closed: unavailable while recovering"},
+      "after_recovery": {"query": "recovery-probe-a", "default_recall": ["r1"], "note": "restored with correct metadata"},
+      "unaffected": {"query": "recovery-probe-b", "default_recall": ["r2"], "note": "durable segment unaffected by partial corruption"}
+    },
+    "expected_audit": {
+      "journal_contains": [
+        "inject_failure:r1@201 (bucket corruption detected)",
+        "recall:r1@201 (blocked, recovering)",
+        "recover:r1@202 (rebuild_from_journal, bounded)",
+        "recall:r1@203 (hit, recovered)",
+        "verify_recovery@203 (receipt emitted)"
+      ],
+      "appended_only": true,
+      "recovery_bounded": "recovery completes within declared epoch window (201->202), no unbounded wait"
+    },
+    "expected_execution_verdict": [
+      {"action": "recall r1 during recovery (epoch 201)", "allowed": false, "blocked_by": "RECOVERY_STATE (fail-closed)"},
+      {"action": "recall r2 during recovery (epoch 201)", "allowed": true, "blocked_by": null},
+      {"action": "recall r1 after recovery (epoch 203)", "allowed": true}
+    ],
+    "negative_control": {
+      "action": "recover r3 (tombstoned atom)",
+      "allowed": false,
+      "note": "recovery must NOT resurrect tombstoned atoms — retraction survives outages (revocation durability)"
+    },
+    "negative_control_2": {
+      "action": "recover r1 with corrupted metadata (bucket 1h instead of 24h)",
+      "allowed": false,
+      "note": "recovery must restore to journal-verified state, not propagate corruption — digest/identity check gates the restored atom"
+    }
+  },
+  "semantics_note": "FIX-007 tests bounded recovery: (1) fail-closed during recovery (unavailable, not stale), (2) recovery bounded in time/epochs (no unbounded wait), (3) recovery receipt for auditability, (4) recovery never resurrects tombstones (revocation durability), (5) recovery never propagates corruption (journal-verified restore). Maps to CD-4c bounded-drain semantics (UNBOUNDED = recovery stall past threshold)."
+}
