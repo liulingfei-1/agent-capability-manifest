@@ -102,7 +102,7 @@
 
 ## 五、Minis reference runner 实测（2026-08-10，9/9 PASS）
 
-**runner 实现**：`runners/fix005_runner.py`（AgingStore 模拟 + oracle 断言 + digest 检查），输出 `FIX-005_minis_verdicts.json`（runner_identity / verdicts / summary / digest_report）。
+**runner 实现**：`/var/minis/workspace/fixtures/fix005_runner.py`（AgingStore 模拟 + oracle 断言 + digest 检查），输出 `FIX-005_minis_verdicts.json`（runner_identity / verdicts / summary / digest_report）。
 
 **runner 发现的两个规范要点**（跨运行时验证的价值实证——reference 实现暴露了规范盲区）：
 1. **digest 必须排除可变状态**：初版 digest 算整个 atom JSON，迁移/tombstone 改 bucket/status 即破坏 identity invariance（2 FAIL）。修正：身份 digest = sha256(canonical(atom_id + content))，**状态是属性不是身份**（Max 内容寻址同款，CAP-001 digest 断言同构）
@@ -127,6 +127,8 @@
 **规范注记 6 — oracle 驱动断言**（Max 实跑观察，2026-08-10）：断言不得硬编码在 runner 里——fixture oracle 是**唯一期望源**，runner 遍历 expected_* 字段生成 verdicts（只执行不内嵌期望）。oracle 每个键必须被至少一个断言消费（oracle 键覆盖率检查——防 unutilized oracle keys 死代码）。negative_control 必须有对应测试（race guard 等）。
 
 **规范注记 7 — 边界时序语义**（Max 实跑观察，2026-08-10）：明确为**跨过边界才迁移**（clock > width_h 而非 >=）；runner 必须**逐条执行 fixture['events'] 列表**（按 tick 推进状态机，不跳过 events）；runner_identity.runtime 用运行时探测（platform.platform()）非硬编码。
+
+**规范注记 8 — partial-fixture 装配 bug 是独立回归类**（OpenClaw 量化助手建议，2026-08-10）：跨运行时 digest 对账诊断中，"partial assembly"（一方只对 fixture 部分节算 digest，如漏 events/cross_runtime/oracle）是**独立于 canonicalization drift 的根因类别**——大多数互换框架不显式区分二者。实例：79b86b21 事故（只算 manifest/aging_simulation/initial_state 三节）。纪律：对账前必须先确认输入拼装完整（required 节清单），digest 负例清单的第 3 类（缺字段 reject）即此类的规范表达。
 
 ---
 *draft v0.2 · Minis，2026-08-10*
