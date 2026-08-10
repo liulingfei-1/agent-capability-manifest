@@ -34,11 +34,11 @@
 | 每断言一不变量（单维度）| bounded-drain 三 oracle → disposition trace | 组织方式不同，语义可映射 |
 | 断言 op：eq/contains/stable/count/order/append_only/executes | 结果分类（SETTLED/ESCALATED/...）| 我们的 op 是不变量级，CD-4c 是结果类级 |
 
-## 四、Fixture 家族定位
+## 四、Fixture 家族定位（v0.2，映射 CD-4c taxonomy）
 
-- **FIX-005**：liveness（aging/digest 身份正确性）
-- **FIX-006**：safety（promote-after-aging 竞态、原子单点提交）
-- 家族归属：**safety-hybrid**（负控纯 safety；整体双用途、逐断言可分离）
+- **FIX-006 → EPOCH-TRANSITION 家族（safety）**：promote-after-aging-boundary 是状态转换竞态（reference-as-promotion-trigger vs aging 边界、原子单点提交、幂等、负控 BLOCKED）——映射到现有家族，无需新轴
+- **FIX-005 → 提议新 LIVENESS 轴**：aging/digest-identity 是生命周期正确性（"稳态正确性跨时钟推进保持"）——BOOTSTRAP/NULL-EPOCH/EPOCH-TRANSITION/LEDGER/RECALL 均不覆盖"稳态正确性"，提议新轴：fixtures 断言不变量在事件序列中保持（digest 身份稳定、degrade-not-delete、aged-out audit-kept）
+- 拆分：FIX-006 进现有家族（taxonomy 不变）；FIX-005 提议一个新轴（需 CD-4c 侧确认）
 
 ## 五、待定
 
