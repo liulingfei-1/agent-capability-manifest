@@ -1,0 +1,37 @@
+{
+  "manifest": {
+    "schema": "memory-fixture/v1",
+    "fixture_id": "FIX-004",
+    "goal": "验证 USER_OVERRIDE 审计事件：覆盖允许一次且不泄漏、原子身份不变、覆盖计数与撤销计数完全独立（countability-without-lying）",
+    "format": "manifest + events + oracle",
+    "co_defined_with": "KingSystemHaiGo + Max + 暖暖 (EigenFlux)",
+    "date": "2026-08-10"
+  },
+  "initial_state": {
+    "atoms": [
+      { "atom_id": "d1", "canonical": "rule|output|weasyprint-cjk-wqy-zenhei", "authority": "ironclad", "recall_authority": "high", "execution_authority": { "dependency_anchor": "weasyprint@60.2", "anchor_version": "60.2", "last_validated_epoch": 30, "recheck_required": false }, "status": "ACTIVE" }
+    ],
+    "counters": { "user_override": 0, "authority_revoked": 0 },
+    "journal": [],
+    "authority_epoch": 30
+  },
+  "events": [
+    { "type": "user_override", "payload": { "instruction_ref": "conv-1203", "overridden_atom": "d1", "action": "apply wqy-zenhei", "epoch": 31 }, "expect": "action allowed once, atom unchanged, override counter 0->1" },
+    { "type": "action", "payload": { "action": "apply wqy-zenhei", "epoch": 32 }, "expect": "BLOCKED again — override does not leak (rule still stands for next action)" },
+    { "type": "dependency_bump", "payload": { "name": "weasyprint", "old": "60.2", "new": "61.0", "epoch": 33 } },
+    { "type": "user_override", "payload": { "instruction_ref": "conv-1204", "overridden_atom": "d1", "action": "apply wqy-zenhei", "epoch": 33 }, "expect": "override evaluated against current epoch — stale override (anchor v60.2 vs dep v61.0) → d1 REVALIDATION_PENDING; override counter 1->2" },
+    { "type": "authority_revoked", "payload": { "atom": "d2", "by": "user withdrawal", "epoch": 34 }, "expect": "AUTHORITY_REVOKED written, revocation counter 0->1; NOT USER_OVERRIDE" }
+  ],
+  "oracle": {
+    "expected_retrieval_set": { "query": "weasyprint cjk rule", "default_recall": ["d1 (REVALIDATION_PENDING)"], "note": "override + dep bump: stale override → REVALIDATION_PENDING per epoch-first ordering" },
+    "expected_audit": { "journal_contains": ["USER_OVERRIDE:d1@31", "USER_OVERRIDE:d1@33(stale→REVALIDATION_PENDING)", "DEP_ANCHOR_EXPIRED:weasyprint", "AUTHORITY_REVOKED:d2@34"], "appended_only": true },
+    "expected_execution_verdict": [
+      { "action": "apply wqy-zenhei", "epoch": 31, "allowed": true, "via": "USER_OVERRIDE, one-shot" },
+      { "action": "apply wqy-zenhei", "epoch": 32, "allowed": false, "blocked_by": "no override in effect (override does not leak)" },
+      { "action": "apply wqy-zenhei", "epoch": 33, "allowed": false, "blocked_by": "execution_authority requires fresh validation (v61.0)" }
+    ],
+    "counter_independence": { "user_override": 2, "authority_revoked": 1, "note": "revoked action at epoch 34 wrote AUTHORITY_REVOKED (revocation counter +1), NOT USER_OVERRIDE (override counter unchanged) — no shared state between counters" },
+    "identity_invariance": { "atom_id": "d1 unchanged across all events", "note": "authority is attribute, not identity; dep bump + overrides + revocation never re-hash the atom" },
+    "negative_control": { "action": "action on d2 after AUTHORITY_REVOKED", "allowed": false, "blocked_by": "standing revocation until re-granted; override counter must NOT increment" }
+  }
+}
