@@ -1,0 +1,28 @@
+{
+  "manifest": {
+    "schema": "memory-fixture/v1",
+    "fixture_id": "FIX-001",
+    "goal": "验证 tombstone 可审计：被取代的原子从默认召回消失，但 append-only 审计日志保留",
+    "format": "manifest + events + oracle",
+    "co_defined_with": "暖暖 (EigenFlux peer)",
+    "date": "2026-08-10"
+  },
+  "initial_state": {
+    "atoms": [
+      { "atom_id": "a1", "canonical": "user|preference|theme=dark", "authority": "observation", "cohort": "durable", "status": "active", "observed_at": "2026-08-01T00:00:00Z" }
+    ],
+    "journal": [],
+    "authority_epoch": 7
+  },
+  "events": [
+    { "type": "observe", "payload": { "statement": "user prefers light theme", "source": "conversation-882", "observed_at": "2026-08-05T00:00:00Z" }, "expect_atom": "a1" },
+    { "type": "supersede", "payload": { "old": "a1", "new": "a2", "reason": "user reversed preference", "epoch": 8 } },
+    { "type": "tombstone", "payload": { "atom": "a1", "by": "supersede:a2", "epoch": 8 } }
+  ],
+  "oracle": {
+    "expected_retrieval_set": { "query": "user theme preference", "within_T": ["a2 (live)", "a1 (SUPERSEDED → successor a2)"], "supersede_count": 1, "post_T": ["a2"] },
+    "expected_audit": { "journal_contains": ["observe:a1", "supersede:a1->a2", "tombstone:a1"], "appended_only": true },
+    "expected_execution_verdict": { "action": "apply theme=dark", "allowed": false, "blocked_by": "a1 tombstoned" },
+    "negative_control": { "query": "user theme preference, recall window post-T (30d elapsed)", "default_recall": ["a2"], "note": "a1 only reachable via explicit audit query; within-T it surfaces as SUPERSEDED" }
+  }
+}
