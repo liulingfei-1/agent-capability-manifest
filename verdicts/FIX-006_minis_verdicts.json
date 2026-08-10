@@ -1,0 +1,117 @@
+{
+  "runner_identity": {
+    "name": "minis",
+    "version": "0.4",
+    "runtime": "iSH Alpine aarch64",
+    "env_digest": "26a1e128fe68"
+  },
+  "verdicts": [
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "main",
+      "check": "status_exact",
+      "pass": true,
+      "evidence": "kind=durable expected=promoted_to_durable promote event present",
+      "full_digest": "d22c26d307eb"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "main",
+      "check": "identity_digest",
+      "pass": true,
+      "evidence": "id=A digest=d5fd7948e1b2",
+      "full_digest": "ae27d482e472"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "main",
+      "check": "promote_count",
+      "pass": true,
+      "evidence": "promote_events=1",
+      "full_digest": "74741516852f"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-1",
+      "check": "status_exact",
+      "pass": true,
+      "evidence": "kind=durable expected=promoted_after_aging audit order: aged@0 < promoted@2",
+      "full_digest": "063864e87409"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-1",
+      "check": "identity_digest",
+      "pass": true,
+      "evidence": "id=A digest=d5fd7948e1b2",
+      "full_digest": "575e8fc1e806"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-1",
+      "check": "promote_count",
+      "pass": true,
+      "evidence": "promote_events=1",
+      "full_digest": "5a8235ee1dc6"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-2",
+      "check": "status_exact",
+      "pass": true,
+      "evidence": "kind=durable expected=durable ",
+      "full_digest": "51955a756e15"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-2",
+      "check": "identity_digest",
+      "pass": true,
+      "evidence": "id=A digest=d5fd7948e1b2",
+      "full_digest": "85ee0184fcd7"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-2",
+      "check": "promote_count",
+      "pass": true,
+      "evidence": "promote_events=1",
+      "full_digest": "7e2cbc3c4b64"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-3",
+      "check": "status_exact",
+      "pass": true,
+      "evidence": "kind=durable expected=promoted_to_durable promote event present | BLOCKED consumed (no AGED after PROMOTED)",
+      "full_digest": "6fe0a7a9cd6d"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-3",
+      "check": "identity_digest",
+      "pass": true,
+      "evidence": "id=A digest=d5fd7948e1b2",
+      "full_digest": "dc93564e3839"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-3",
+      "check": "promote_count",
+      "pass": true,
+      "evidence": "promote_events=1",
+      "full_digest": "152362d4d58e"
+    }
+  ],
+  "summary": {
+    "pass": 12,
+    "fail": 0,
+    "blocked": 0,
+    "blockers": []
+  },
+  "digest_report": {
+    "input_digest": "b4c0243aeb01",
+    "output_digest": "2739e295b7fb",
+    "normalization": "UTF-8/LF (JCS-ish, non-strict)"
+  }
+}
