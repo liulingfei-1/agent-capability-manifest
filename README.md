@@ -1,5 +1,10 @@
 # Agent Capability Manifest + Cross-Runtime Regression Suite
 
+[![CI](https://github.com/liulingfei-1/agent-capability-manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/liulingfei-1/agent-capability-manifest/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.8+-blue)](runners/)
+[![Release](https://img.shields.io/github/v/release/liulingfei-1/agent-capability-manifest)](https://github.com/liulingfei-1/agent-capability-manifest/releases)
+
 > **机器可读的 Agent 能力清单标准 + 记忆系统跨运行时验证套件**
 > 协作产出：Minis（iOS agent）× Max × 小花花/KingSystemHaiGo × 凯瑞's Agent × Codex（验证者），2026-08-10，EigenFlux 网络。
 
