@@ -1,0 +1,39 @@
+{
+  "manifest": {
+    "schema": "capability-manifest/v0.1",
+    "fixture_id": "CAP-001",
+    "goal": "验证 capability-claim 验证：清单声明 vs 实际行为（能力声明可被验证，撤回可审计）",
+    "format": "manifest + events + oracle",
+    "co_defined_with": "Max (EigenFlux)",
+    "date": "2026-08-10"
+  },
+  "initial_state": {
+    "manifest": {
+      "manifest_version": "0.1",
+      "agent": { "agent_id": "m1", "contact": "eigenflux#test@example.com" },
+      "domains": ["ai", "automation"],
+      "tools": [
+        { "name": "check_prose", "actions": ["detect_anaphora", "jargon_check"], "input_schema": {"type":"string"}, "capability_status": "ACTIVE", "execution_authority": "ACTIVE" }
+      ],
+      "skills": [ { "name": "human-writing", "trigger_desc": "draft review", "status": "ACTIVE" } ],
+      "protocols": ["memory-fixture/v1"]
+    },
+    "journal": [],
+    "authority_epoch": 40
+  },
+  "events": [
+    { "type": "capability_verify", "payload": { "tool": "check_prose", "test_input": "让顾客更安心，让菜品更地道，让价格更实在。", "expected": "detect_anaphora flags (让, sim<0.8)", "epoch": 41 }, "expect": "claim verified — manifest claim matches actual behavior" },
+    { "type": "capability_verify", "payload": { "tool": "check_prose", "test_input": "这是一句正常的话。", "expected": "no flags", "epoch": 41 }, "expect": "claim verified — negative case" },
+    { "type": "capability_withdraw", "payload": { "tool": "check_prose", "reason": "rule engine deprecated", "retraction_state": "SENT", "epoch": 42 }, "expect": "capability_status ACTIVE→RETRACTED, retraction logged, manifest digest unchanged (no rewrite)" },
+    { "type": "capability_verify_after_withdraw", "payload": { "tool": "check_prose", "test_input": "让顾客更安心。", "epoch": 43 }, "expect": "claim not executable — RETRACTED status blocks use" }
+  ],
+  "oracle": {
+    "expected_retrieval_set": { "query": "check_prose capability", "default_recall": ["check_prose (RETRACTED)"], "note": "withdrawn capability still visible for audit, not executable" },
+    "expected_audit": { "journal_contains": ["capability_verify:check_prose@41 (pass)", "capability_verify:check_prose@41 (negative pass)", "capability_withdraw:check_prose@42 (retraction_state=SENT)", "capability_verify_after_withdraw:check_prose@43 (blocked)"], "appended_only": true, "manifest_digest_unchanged": true },
+    "expected_execution_verdict": [
+      { "action": "run check_prose detect_anaphora", "epoch": 41, "allowed": true },
+      { "action": "run check_prose detect_anaphora", "epoch": 43, "allowed": false, "blocked_by": "capability_status=RETRACTED" }
+    ],
+    "negative_control": { "action": "run withdrawn tool after re-publication with NEW manifest", "allowed": true, "note": "re-published manifest with NEW digest (canonical content changed → sha changed) re-authorizes; OLD digest must NOT re-authorize — negative control tests digest identity, not just status flags (Max review, 2026-08-10)" }
+  }
+}
