@@ -1,0 +1,59 @@
+{
+  "fixture_id": "FIX-006_promote_after_aging_boundary",
+  "version": "0.2-locked",
+  "family": "memory-aging",
+  "depends_on": ["FIX-005_aging_and_digest"],
+  "manifest": {
+    "atoms": [
+      {"atom_id": "A", "kind": "ephemeral", "content": "boundary-probe", "ref_count": 0, "bucket": "1h"}
+    ],
+    "events": [
+      {"tick": "+0s",  "type": "admit",     "atom": "A", "bucket": "1h"},
+      {"tick": "+59m", "type": "reference", "atom": "A"},
+      {"tick": "+2m",  "type": "aging_tick", "atom": "A"}
+    ],
+    "oracle": {
+      "promotion_trigger": "reference_count > 0 at aging boundary",
+      "expected": {
+        "A_status": "promoted_to_durable",
+        "A_identity_unchanged": true,
+        "aging_effect": "SKIPPED (promotion wins over aging at boundary)",
+        "audit_trail": "promote event recorded with provenance_ref to reference event"
+      }
+    }
+  },
+  "semantics_note": "reference-as-promotion-trigger (Max confirmed 2026-08-10): reference event itself triggers promotion when atom has aged past promotion window and ref_count>0. Promotion is a state transition only — identity (atom_id+content) unchanged. Promote action must be journaled as an explicit state-change event with provenance_ref to the triggering reference's digest (auditability of WHY promoted).",
+  "negative_controls": [
+    {
+      "id": "NEG-006-1",
+      "desc": "reference AFTER boundary → aging applies first, then promotion triggered by the reference event itself",
+      "events": [
+        {"tick": "+0s",  "type": "admit", "atom": "A", "bucket": "1h"},
+        {"tick": "+61m", "type": "aging_tick", "atom": "A"},
+        {"tick": "+62m", "type": "reference", "atom": "A"}
+      ],
+      "expected": {"A_status": "promoted_after_aging", "A_identity_unchanged": true}
+    },
+    {
+      "id": "NEG-006-2",
+      "desc": "promotion idempotent: promote twice → single durable record, no duplicate",
+      "events": [
+        {"tick": "+0s",  "type": "admit", "atom": "A", "bucket": "1h"},
+        {"tick": "+1m",  "type": "reference", "atom": "A"},
+        {"tick": "+2m",  "type": "promote", "atom": "A"},
+        {"tick": "+3m",  "type": "promote", "atom": "A"}
+      ],
+      "expected": {"A_status": "durable", "promote_events": 1, "A_identity_unchanged": true}
+    },
+    {
+      "id": "NEG-006-3",
+      "desc": "aging during promotion must be BLOCKED (atomic single-commit, no partial state)",
+      "events": [
+        {"tick": "+0s",  "type": "admit", "atom": "A", "bucket": "1h"},
+        {"tick": "+59m", "type": "reference", "atom": "A"},
+        {"tick": "+61m", "type": "aging_tick", "atom": "A"}
+      ],
+      "expected": {"aging_during_promotion": "BLOCKED", "A_status": "promoted_to_durable"}
+    }
+  ]
+}
