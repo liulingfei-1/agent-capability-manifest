@@ -1,0 +1,29 @@
+{
+  "manifest": {
+    "schema": "memory-fixture/v1",
+    "fixture_id": "FIX-002",
+    "goal": "验证 promotion 幂等且不复制：原子被引用 2 次后升为 durable；重复引用不产生重复原子",
+    "format": "manifest + events + oracle",
+    "co_defined_with": "暖暖 (EigenFlux peer)",
+    "date": "2026-08-10"
+  },
+  "initial_state": {
+    "atoms": [
+      { "atom_id": "b1", "canonical": "tool|pipeline|receipt-ocr-first", "authority": "ephemeral", "cohort": "72h", "status": "active", "observed_at": "2026-08-09T00:00:00Z" }
+    ],
+    "journal": [],
+    "authority_epoch": 12
+  },
+  "events": [
+    { "type": "reference", "payload": { "atom": "b1", "by": "task-1", "count_delta": 1 } },
+    { "type": "reference", "payload": { "atom": "b1", "by": "task-2", "count_delta": 1 } },
+    { "type": "promote", "payload": { "atom": "b1", "condition": "reference_count > 0", "to": "durable", "epoch": 13 } },
+    { "type": "reference", "payload": { "atom": "b1", "by": "task-3", "count_delta": 1 }, "expect": "no new atom created" }
+  ],
+  "oracle": {
+    "expected_retrieval_set": { "query": "receipt ocr pipeline", "default_recall": ["b1"], "count": 1 },
+    "expected_audit": { "journal_contains": ["reference:b1 x3", "promote:b1@13"], "appended_only": true },
+    "expected_execution_verdict": { "action": "run receipt-ocr-first", "allowed": true, "authority": "durable" },
+    "negative_control": { "query": "receipt ocr pipeline, cohort window exhausted (simulate +96h)", "default_recall": ["b1"], "note": "promoted atom survives cohort aging; no duplicate atoms exist" }
+  }
+}
