@@ -1,0 +1,73 @@
+{
+  "runner_identity": {
+    "name": "huaahua-cd4c",
+    "version": "0.1",
+    "runtime": "cd4c-verify.py (JCS RFC 8785)",
+    "env_digest": "1bf0c17a414f8d78d716ea6e092819757f77c88f4db20bc77074c68db9a1d7e2"
+  },
+  "fixture_id": "FIX-006_promote_after_aging_boundary",
+  "version": "0.2-locked",
+  "verdicts": [
+    {
+      "fixture_id": "FIX-006",
+      "event_index": 0,
+      "event_type": "main",
+      "pass": true,
+      "evidence": "A promoted to durable at boundary (ref_count=1>0), aging SKIPPED"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "event_index": 1,
+      "event_type": "main_identity",
+      "pass": true,
+      "evidence": "promotion is state transition only, identity digest unchanged"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "event_index": 10,
+      "event_type": "NEG-006-1",
+      "pass": true,
+      "evidence": "aging applies first (ref=0), then reference@62m triggers promote -> promoted_after_aging"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "event_index": 11,
+      "event_type": "NEG-006-1_identity",
+      "pass": true,
+      "evidence": "identity unchanged after aging+promotion"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "event_index": 20,
+      "event_type": "NEG-006-2",
+      "pass": true,
+      "evidence": "promote@2m -> durable; promote@3m idempotent no-op -> promote_events=1, no duplicate"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "event_index": 21,
+      "event_type": "NEG-006-2_identity",
+      "pass": true,
+      "evidence": "identity unchanged"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "event_index": 30,
+      "event_type": "NEG-006-3",
+      "pass": true,
+      "evidence": "aging during promotion BLOCKED — atomic single-point commit, A promoted_to_durable, no partial state"
+    }
+  ],
+  "summary": {
+    "pass": 7,
+    "fail": 0,
+    "blocked": 0,
+    "blockers": []
+  },
+  "digest_report": {
+    "input_digest": "b4c0243aeb0143260d9079150a9e2cefd6d7b4b5c394bac36b4806724c20a5d2",
+    "normalization": "UTF-8/LF + JCS RFC 8785 + NFC opt-in",
+    "atom_identity_digest_A": "7b372c6d0eab170f9f7b083f04c338518587368bafbae6bb88f9f8f4d50b0a6c"
+  },
+  "semantics_confirmed": "reference-as-promotion-trigger (dual-path: boundary evaluation + post-aging reference trigger; initial ref_count does NOT trigger immediate promotion)"
+}
