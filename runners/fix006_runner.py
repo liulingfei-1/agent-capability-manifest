@@ -109,7 +109,7 @@ def run_scenario(name, events, exp, atoms_init):
             for cname, ok, note in checks]
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else 'FIX-006_promote_after_aging_boundary.json'
+    path = sys.argv[1] if len(sys.argv) > 1 else '/var/minis/workspace/regression-pack/FIX-006_promote_after_aging_boundary.json'
     fixture = json.load(open(path))
     input_digest = norm_digest(fixture)
     atoms_init = fixture['manifest']['atoms']
