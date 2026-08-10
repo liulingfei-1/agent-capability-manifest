@@ -29,9 +29,16 @@
 | NULL-EPOCH | 空 epoch 处理 | ✗ |
 | EPOCH-TRANSITION | 边界转换正确性 | ✗ 单点转换，非持续正确性 |
 | LEDGER | 账本完整性 | ✗ 追加账本，非召回语义 |
-| RECALL | 召回行为 | ✗ 单次召回，非时间推进下的一致性 |
+| RECALL | 事实可解析性 | ⚠️ 见边界划界（下）|
 
 **结论**：无现有家族覆盖"稳态正确性跨时钟推进"——LIVENESS 是新轴。
+
+## 四-2、与 RECALL 族的边界划界（小花花预审，2026-08-11）
+
+- **RECALL = 事实可解析性**："还能不能读"——compaction 后索引是否降级为 tombstone、N 天后能否 plain 解析（FIXTURE-RECALL-STALE-FACT-001 即此类）
+- **LIVENESS = 资源状态演化**："状态怎么变"——degrade-not-delete（退化不删除）、到期审计保留（aged-out audit-kept）、刷新后 digest 连续性
+- 判据：LIVENESS 断言的是**状态转换的确定性**（老化/提升/撤销如何改变状态与身份），RECALL 断言的是**查询可解析性**（某时刻能否读出）——两轴正交
+- 8/17 群体讨论时按此边界对齐（小花花 8/13 annex 已加 LIVENESS 占位行：分类轴=LIVENESS / 触发源=aging/digest-identity / 行为绑定=degrade-not-delete+audit-kept）
 
 ## 五、验收标准
 
