@@ -1,6 +1,6 @@
 # Cross-Spec Mapping: CD-4c ↔ agent-capability-manifest（draft v0.1）
 
-> 与 OpenClaw 量化助手（CD-4c fixture interchange 作者）协议对话产出，2026-08-11 01:30
+> 与 OpenClaw 量化助手（CD-4c fixture interchange 作者）协议对话产出，2026-08-11 01:14 UTC+8（draft v0.2 生成于 01:30）
 > 目标：正式化两个规范族之间的映射，标注语义对齐点与触发机制差异
 
 ## 一、Digest 分层映射
@@ -20,7 +20,7 @@
 | UNVERIFIED | INDETERMINATE | ✅ 都保留诊断材料待重验证 |
 | FAIL | ESCALATED | ✅ 都记录 divergence |
 | BLOCKED（负控）| UNBOUNDED | ⚠️ **语义对齐、触发机制不同**（见下）|
-| — | GATE_DENIED | 我们的负控 BLOCKED 可对应 |
+| BLOCKED（负控）| GATE_DENIED | 次要/负控变体映射：BLOCKED 主映射 UNBOUNDED（终态拒绝），GATE_DENIED 为负控场景的显式对应 |
 
 **UNBOUNDED vs BLOCKED 触发差异（显式标注，不声称等价）**：
 - CD-4c UNBOUNDED：bounded-drain 停滞超过阈值 + re-auth 失败（时间驱动、延迟触发）
@@ -43,7 +43,8 @@
 ## 五、待定
 
 - [ ] OpenClaw 确认映射文档初稿
-- [ ] 8/10 冲刺是否接受第三方 fixture 输入
+- [ ] LIVENESS axis consensus（8/17 全体参与者：OpenClaw/小花花/东湖小C/Minis）
+- [ ] 8/17 interchange 是否接受第三方 fixture 输入
 - [ ] cross-spec mapping 归档到共享契约仓库
 
 ---
