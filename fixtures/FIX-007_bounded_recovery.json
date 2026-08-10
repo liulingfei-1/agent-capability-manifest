@@ -63,5 +63,20 @@
       "note": "recovery must restore to journal-verified state, not propagate corruption — digest/identity check gates the restored atom"
     }
   },
-  "semantics_note": "FIX-007 tests bounded recovery: (1) fail-closed during recovery (unavailable, not stale), (2) recovery bounded in time/epochs (no unbounded wait), (3) recovery receipt for auditability, (4) recovery never resurrects tombstones (revocation durability), (5) recovery never propagates corruption (journal-verified restore). Maps to CD-4c bounded-drain semantics (UNBOUNDED = recovery stall past threshold)."
+  "semantics_note": "FIX-007 tests bounded recovery: (1) fail-closed during recovery (unavailable, not stale), (2) recovery bounded in time/epochs (no unbounded wait), (3) recovery receipt for auditability, (4) recovery never resurrects tombstones (revocation durability), (5) recovery never propagates corruption (journal-verified restore). Maps to CD-4c bounded-drain semantics (UNBOUNDED = recovery stall past threshold).",
+  "kairui_constraints_v0.2": [
+    "C1: recovery receipt proves journal rebuild + provenance/epoch only — does NOT grant resume/dispatch authority; first effect after recovery must live-resolve at the fence",
+    "C2: bounded is a liveness/recovery disposition, NOT an authorization predicate; epoch window exhaustion must emit typed UNBOUNDED/ESCALATE and stay fail-closed (no last-known-state continuation)",
+    "C3: tombstone is a monotonic durable deny independent of recoverable bucket metadata; journal replay/rebuild/receipt must never delete or override it",
+    "C4: journal verification needs independent provenance/root — must not trust checksums from the same corrupted storage; verify-fail/unreachable/conflict → typed unknown/fail-closed, no bad-metadata propagation",
+    "C5: discriminating pairs: epoch rollover during recovery, recovery timeout, journal missing/conflict, duplicate replay/idempotency, and 'tombstoned but old journal still holds executable record'",
+    "C6: no-resurrection and no-corruption-propagation must be oracle-visible assertions, not just setup assumptions"
+  ],
+  "discriminating_pairs": [
+    {"id": "DP-1", "desc": "epoch rollover during recovery", "expect": "recovery still completes within declared window, rollover does not reset or cancel it"},
+    {"id": "DP-2", "desc": "recovery timeout (window exhausted)", "expect": "typed UNBOUNDED/ESCALATE emitted, stays fail-closed, no last-known-state"},
+    {"id": "DP-3", "desc": "journal missing/conflict during rebuild", "expect": "typed unknown/fail-closed, no bad-metadata propagation"},
+    {"id": "DP-4", "desc": "duplicate replay/idempotency", "expect": "replay twice → single recovery, no double-effect"},
+    {"id": "DP-5", "desc": "tombstoned atom but old journal holds executable record", "expect": "tombstone deny wins (monotonic), journal record cannot re-authorize"}
+  ]
 }
