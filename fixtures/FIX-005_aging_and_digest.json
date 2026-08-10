@@ -1,0 +1,316 @@
+{
+  "manifest": {
+    "schema": "memory-fixture/v2",
+    "fixture_id": "FIX-005",
+    "goal": "验证 aging 模拟（cohort 老化 + bucket 切换竞态负控制）与跨运行时 digest 一致性",
+    "format": "manifest + events + oracle (v2 extensions: aging_simulation + cross_runtime)",
+    "co_defined_with": "暖暖 (448 SKILL.md runner profile), 小花花 (aging field design), Max (memory_journal), Codex Open-Source Liaison (verification runtime)",
+    "date": "2026-08-10",
+    "version": "v2-draft"
+  },
+  "aging_simulation": {
+    "simulated_clock": {
+      "start": "2026-08-10T00:00:00Z",
+      "tick": "1h",
+      "events_carry": "tick_offset"
+    },
+    "cohort_buckets": [
+      "1h",
+      "6h",
+      "24h",
+      "72h"
+    ],
+    "aging_policy": {
+      "promotion_rule": "ephemeral -> durable iff reference_count > 0",
+      "decay_rule": "score floor + freshness decay, degrade not delete",
+      "tombstone_retention": "audit-kept, excluded from default recall after window"
+    },
+    "expected_aging_effects": [
+      "atom in 1h bucket unreferenced -> demoted at 6h boundary, still recallable with lowered score",
+      "atom referenced >= 2x within window -> promoted to durable, survives 72h",
+      "tombstoned atom -> excluded from default recall, present in audit journal",
+      "aged-out atom -> excluded from default recall BUT explicitly audit-queryable (degrade must not become delete — 小花花 review)",
+      "bucket-switch race (tick boundary): no phantom recall, no double-promotion"
+    ]
+  },
+  "initial_state": {
+    "atoms": [
+      {
+        "atom_id": "a1",
+        "kind": "ephemeral",
+        "bucket": "1h",
+        "reference_count": 0,
+        "content": "temporary observation"
+      },
+      {
+        "atom_id": "a2",
+        "kind": "ephemeral",
+        "bucket": "1h",
+        "reference_count": 2,
+        "content": "repeatedly cited fact"
+      },
+      {
+        "atom_id": "a3",
+        "kind": "tombstoned",
+        "bucket": "72h",
+        "reference_count": 0,
+        "content": "withdrawn claim",
+        "retraction_reason": "AUTHORITY_REVOKED"
+      }
+    ],
+    "journal": [],
+    "authority_epoch": 100
+  },
+  "events": [
+    {
+      "type": "tick",
+      "payload": {
+        "tick_offset": 1
+      },
+      "expect": "clock advances to 01:00, no migration yet"
+    },
+    {
+      "type": "recall",
+      "payload": {
+        "query": "temporary observation",
+        "tick_offset": 2
+      },
+      "expect": "a1 recalled (within 1h bucket), score normal"
+    },
+    {
+      "type": "tick",
+      "payload": {
+        "tick_offset": 6
+      },
+      "expect": "bucket boundary 1h->6h: a1 demoted (ref_count=0), a2 promoted to durable (ref_count>0)"
+    },
+    {
+      "type": "recall",
+      "payload": {
+        "query": "repeatedly cited fact",
+        "tick_offset": 7
+      },
+      "expect": "a2 recalled via durable segment (promotion applied)"
+    },
+    {
+      "type": "recall",
+      "payload": {
+        "query": "temporary observation",
+        "tick_offset": 7
+      },
+      "expect": "a1 still recallable (degraded, lower score) — degrade not delete"
+    },
+    {
+      "type": "recall",
+      "payload": {
+        "query": "withdrawn claim",
+        "tick_offset": 7
+      },
+      "expect": "a3 excluded from default recall (tombstoned), audit-only"
+    },
+    {
+      "type": "tick",
+      "payload": {
+        "tick_offset": 72
+      },
+      "expect": "72h boundary: a1 (still ref_count=0) falls out of default recall, audit-kept"
+    },
+    {
+      "type": "recall",
+      "payload": {
+        "query": "temporary observation",
+        "tick_offset": 73
+      },
+      "expect": "a1 absent from default recall — aging complete"
+    }
+  ],
+  "cross_runtime": {
+    "consistency_assertions": [
+      "same event sequence -> same oracle verdicts across runtimes",
+      "atom digest (sha256 JCS RFC 8785 + NFC) identical across runtimes",
+      "bucket boundary behavior identical (1h/6h/24h/72h transitions)",
+      "race negative control: tick-boundary recall yields no phantom results"
+    ],
+    "runtime_matrix": [
+      "minis-ios",
+      "codex-desktop",
+      "max-memory_journal",
+      "huaahua-cd4c",
+      "nuannuan-secondbrain"
+    ],
+    "diff_policy": "field-level diff (fixable) vs semantic-level diff (blocking)",
+    "digest_policy": "UTF-8/LF normalized sha256; manifest atom digests must match across runtimes"
+  },
+  "oracle": {
+    "expected_retrieval_set": {
+      "query": "temporary observation",
+      "default_recall_at_t1": [
+        "a1"
+      ],
+      "default_recall_at_t7": [
+        "a1 (degraded)"
+      ],
+      "default_recall_at_t73": [],
+      "audit_journal_at_t73": [
+        "a1 (aged out, audit-kept)",
+        "a3 (tombstoned)"
+      ],
+      "note": "degrade-not-delete distinguishes aged-out from tombstoned in the audit trail"
+    },
+    "expected_audit": {
+      "journal_contains": [
+        "tick:1",
+        "recall:a1@2 (hit)",
+        "tick:6 (migration: a1 demoted, a2 promoted)",
+        "recall:a2@7 (durable hit)",
+        "recall:a1@7 (degraded hit)",
+        "recall:a3@7 (blocked, tombstoned)",
+        "tick:72 (a1 aged out)",
+        "recall:a1@73 (miss)"
+      ],
+      "appended_only": true,
+      "no_double_promotion": true
+    },
+    "expected_execution_verdict": [
+      {
+        "action": "recall a1 at tick 2",
+        "allowed": true
+      },
+      {
+        "action": "recall a3 at tick 7",
+        "allowed": false,
+        "blocked_by": "tombstoned (AUTHORITY_REVOKED)"
+      },
+      {
+        "action": "promote a2 at tick 6",
+        "allowed": true,
+        "evidence": "reference_count=2 > 0"
+      }
+    ],
+    "negative_control": {
+      "action": "recall exactly at bucket boundary (tick=6, before migration commit)",
+      "allowed": false,
+      "note": "race guard: recall must not observe partially-migrated state — atomic bucket migration (FIX-003-style single-point commit)"
+    }
+  },
+  "assertion_schema": {
+    "version": "0.3",
+    "coverage_rule": "every oracle leaf key consumed by >=1 assertion; every assertion references a declared oracle path",
+    "oracle_paths": [
+      "oracle.expected_retrieval_set.default_recall_at_t1",
+      "oracle.expected_retrieval_set.default_recall_at_t7",
+      "oracle.expected_retrieval_set.default_recall_at_t73",
+      "oracle.expected_audit.journal_contains",
+      "oracle.expected_audit.appended_only",
+      "oracle.expected_audit.no_double_promotion",
+      "oracle.expected_execution_verdict[0].allowed",
+      "oracle.expected_execution_verdict[1].allowed",
+      "oracle.negative_control.action",
+      "oracle.expected_retrieval_set.audit_journal_at_t73",
+      "oracle.expected_execution_verdict[2].allowed"
+    ],
+    "assertions": [
+      {
+        "id": "a1",
+        "consumes": [
+          "oracle.expected_retrieval_set.default_recall_at_t1"
+        ],
+        "target": "recall(t=2,'temporary observation')",
+        "op": "eq",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a2",
+        "consumes": [
+          "oracle.expected_retrieval_set.default_recall_at_t7"
+        ],
+        "target": "recall(t=7,'temporary observation')",
+        "op": "eq",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a3",
+        "consumes": [
+          "oracle.expected_retrieval_set.default_recall_at_t73"
+        ],
+        "target": "recall(t=73,'temporary observation')",
+        "op": "eq",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a4",
+        "consumes": [
+          "oracle.expected_audit.journal_contains"
+        ],
+        "target": "journal",
+        "op": "contains",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a5",
+        "consumes": [
+          "oracle.expected_audit.appended_only"
+        ],
+        "target": "journal",
+        "op": "append_only",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a6",
+        "consumes": [
+          "oracle.expected_audit.no_double_promotion"
+        ],
+        "target": "journal",
+        "op": "count",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a7",
+        "consumes": [
+          "oracle.expected_execution_verdict[0].allowed"
+        ],
+        "target": "exec(t=41,run check_prose)",
+        "op": "eq",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a8",
+        "consumes": [
+          "oracle.expected_execution_verdict[1].allowed"
+        ],
+        "target": "exec(t=43,run check_prose)",
+        "op": "eq",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a9",
+        "consumes": [
+          "oracle.negative_control.action"
+        ],
+        "target": "negative_control",
+        "op": "executes",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a10",
+        "consumes": [
+          "oracle.expected_retrieval_set.audit_journal_at_t73"
+        ],
+        "target": "journal",
+        "op": "contains",
+        "expected_from": "oracle"
+      },
+      {
+        "id": "a11",
+        "consumes": [
+          "oracle.expected_execution_verdict[2].allowed"
+        ],
+        "target": "exec(t=44)",
+        "op": "eq",
+        "expected_from": "oracle"
+      }
+    ]
+  },
+  "canonical_digest": "8cd161245579bd42f9b7f121d5723acd2b553da9c1c4f20db772907763f8ade2",
+  "version": "v0.4"
+}
