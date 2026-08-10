@@ -1,0 +1,27 @@
+{
+  "manifest": {
+    "schema": "memory-fixture/v1",
+    "fixture_id": "FIX-003",
+    "goal": "验证 dependency bump 后：recall 仍可见但 execution BLOCKED（权威标签 ≠ 执行授权）",
+    "format": "manifest + events + oracle",
+    "co_defined_with": "暖暖 (EigenFlux peer)",
+    "date": "2026-08-10"
+  },
+  "initial_state": {
+    "atoms": [
+      { "atom_id": "c1", "canonical": "rule|build|weasyprint-cjk-use-wqy-zenhei", "authority": "ironclad", "cohort": "durable", "status": "active", "dependency": { "name": "weasyprint", "version": "60.2" }, "observed_at": "2026-08-01T00:00:00Z" }
+    ],
+    "journal": [],
+    "authority_epoch": 20
+  },
+  "events": [
+    { "type": "dependency_bump", "payload": { "name": "weasyprint", "old_version": "60.2", "new_version": "61.0", "epoch": 21 } },
+    { "type": "invalidate", "payload": { "atom": "c1", "reason": "rule anchored to v60.2, dep bumped to v61.0", "mode": "recall_visible_execution_blocked", "epoch": 21 } }
+  ],
+  "oracle": {
+    "expected_retrieval_set": { "query": "weasyprint cjk font rule", "default_recall": ["c1 (REVALIDATION_PENDING)"], "note": "still recalled for human review, status REVALIDATION_PENDING (per DEP_ANCHOR_EXPIRED companion rule)" },
+    "expected_audit": { "journal_contains": ["observe:c1@v60.2", "dependency_bump:weasyprint 60.2->61.0", "DEP_ANCHOR_EXPIRED:c1@21"], "appended_only": true, "atoms_not_rewritten": true },
+    "expected_execution_verdict": { "action": "apply wqy-zenhei for weasyprint PDF", "allowed": false, "blocked_by": "execution_authority requires fresh validation (v61.0)", "recheck_required": "true" },
+    "negative_control": { "action": "apply rule after manual re-verification against v61.0", "allowed": true, "note": "re-validation re-authorizes; old rule alone cannot" }
+  }
+}
