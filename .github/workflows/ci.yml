@@ -10,43 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Run FIX-005 runner
-        run: python3 runners/fix005_runner.py fixtures/FIX-005_aging_and_digest.json | python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-assert d['summary']['fail'] == 0, f'FIX-005 FAIL: {d[\"summary\"]}'
-assert d['digest_report']['input_digest'] == '8cd161245579bd42', f'digest mismatch: {d[\"digest_report\"][\"input_digest\"]}'
-print(f'FIX-005 OK: {d[\"summary\"]} coverage={d[\"coverage_report\"]}')"
-
-      - name: Run FIX-006 runner
-        run: python3 runners/fix006_runner.py fixtures/FIX-006_promote_after_aging_boundary.json | python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-assert d['summary']['fail'] == 0, f'FIX-006 FAIL: {d[\"summary\"]}'
-assert d['digest_report']['input_digest'] == 'b4c0243aeb01', f'digest mismatch: {d[\"digest_report\"][\"input_digest\"]}'
-print(f'FIX-006 OK: {d[\"summary\"]}')"
-
-      - name: Verify canonical digests (self-excluded)
-        run: python3 -c "
-import json, hashlib, sys
-
-def nd(obj):
-    canon = json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
-    return hashlib.sha256(canon.encode('utf-8').replace(b'\r\n', b'\n')).hexdigest()
-
-# FIX-005 v0.4
-f5 = json.load(open('fixtures/FIX-005_aging_and_digest.json'))
-d5 = {k: v for k, v in f5.items() if k != 'canonical_digest'}
-assert nd(d5) == f5['canonical_digest'], 'FIX-005 canonical_digest mismatch'
-print('FIX-005 canonical_digest OK:', f5['canonical_digest'][:16])
-
-# FIX-006 v0.2-locked
-f6 = json.load(open('fixtures/FIX-006_promote_after_aging_boundary.json'))
-print('FIX-006 fixture loaded OK')
-"
+      - name: Run fixture verification
+        run: python3 scripts/verify_ci.py
