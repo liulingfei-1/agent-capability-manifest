@@ -89,8 +89,6 @@ python3 runners/fixl3_runner.py fixtures/FIX-L3-001.json
 python3 runners/cl_adv_runner.py fixtures/CL-ADV-001_deny_tombstone_replay.json
 # 跑 CAP-3D-001 三域不可变性 fixture
 python3 runners/cap3d_runner.py fixtures/CAP-3D-001_three_digest_domains.json
-# 跑 CAP-3D-001 三域不可变性 fixture
-python3 runners/cap3d_runner.py fixtures/CAP-3D-001_three_digest_domains.json
 ```
 
 输出：`runner_identity + verdicts + summary + coverage_report + digest_report`（完整 64 位 digest，canonicalizer_version 标注）。
