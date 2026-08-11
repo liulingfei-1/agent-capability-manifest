@@ -103,6 +103,15 @@ def run_scenario(name, events, exp, atoms_init):
                 a.audit.append(f"promote@{ev['tick']} -> promoted")
 
     obs_info = {"observed_event_order": observed_order, "final_elapsed_ms": elapsed_ms}
+    # trace_exact assertion (暖暖 review): oracle pins expected trace — time mutations must fail
+    import copy as _cp
+    exp_trace = _cp.deepcopy(locals().get('exp', {})).get('expected_trace')
+    if exp_trace:
+        trace_ok = (observed_order == exp_trace.get('expected_event_order') and
+                    elapsed_ms == exp_trace.get('final_elapsed_ms'))
+        if not trace_ok:
+            verdicts.append({"fixture_id": "FIX-006", "scenario": name, "check": "trace_exact",
+                             "pass": False, "evidence": f"trace mismatch: {observed_order}"})
     a = atoms.get('A')
     if a is None:
         return ([{"pass": False, "evidence": f"{name}: atom A missing"}], obs_info)
