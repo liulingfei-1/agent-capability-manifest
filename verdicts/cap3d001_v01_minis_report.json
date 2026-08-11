@@ -32,11 +32,11 @@
     },
     {
       "fixture_id": "CAP-3D-001_three_digest_domains",
-      "check": "manifest_digest_stable_under_capability_input_reorder",
+      "check": "manifest_digest_changes_when_capability_order_changes",
       "pass": true,
       "expected": true,
       "actual": true,
-      "evidence_digest": "1ba992d81347fde2484c197c0ab955f40a2c0f274b062286994bd14783b3da47"
+      "evidence_digest": "16c34c21b4260bd706c1a2b886b98483afe3246592a14e237322351e76179e9d"
     },
     {
       "fixture_id": "CAP-3D-001_three_digest_domains",
@@ -79,12 +79,12 @@
     "cap_b_identity": "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6",
     "policy_v1_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
     "policy_v2_digest": "0a4737f83058769120a5ef3f1b089319ababf893e4366750be45a8aa85bc036b",
-    "manifest_v1_digest": "1505b6f8fd2be1ac2e5de2eb803ff08a909b665e6e6b48920dacca216530778f",
-    "manifest_v2_digest": "7810242d65621122c6ecbb43062a1d0d230a81f18c9d15b610fc198c937bfc77"
+    "manifest_v1_digest": "b2924f199532da3ce2a7a255c8e768976cede1b4d0712e9968864bc1680b5f50",
+    "manifest_v2_digest": "a6ad5d73e7c659051211969cfeaf69d5c343193dc3e713bb11446ce1115a7539"
   },
   "digest_report": {
-    "input_digest": "005abf8446d8d2a9b8d3cfd9a1a3cdecd95dd14ee260f4cd7cf13325ec52464d",
-    "output_digest": "b306b74439de9ab4cb135bbd2c59a214725a419b4736021d653914b15d3b26f3",
+    "input_digest": "59d9a8ec698d27f2fab12e6f607846bbfd38d5895b4b894b7258815307d06f58",
+    "output_digest": "eae69af4b17305de6b6ad648ccd04e835a61184fa1af58d8a867acc59efd58ed",
     "normalization": "JCS-compatible string/list/object profile + recursive NFC"
   }
 }
