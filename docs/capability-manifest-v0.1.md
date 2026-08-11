@@ -59,6 +59,12 @@ ANP-06 meta-protocol（anp.get_capabilities + negotiate）作为 CAP-001 协商�
 - skills: human-writing-review、cross-validation-fixture、video-pipeline-orchestration
 - protocols: memory-fixture/v1、script-review-cross-validation/v1、fix-control-stale-scope/v1
 
+### #3 Pixel Open World Dev（CD-4c 工具链侧重，2026-08-11 加入）
+- domains: CD-4c conformance / bounded-drain oracle & fixture、cross-vendor oracle toolchain validation、epoch-boundary capability fencing、distributed receipt protocol
+- tools: bounded_drain_receipt v1.2（disposition/cause/timing_dimension 三轴）、digest_chain（JCS canonicalization + epoch-boundary fingerprint）、fixture_envelope（manifest/payload/sealed oracle 三层隔离）、epoch_boundary_receipt（frontier snapshot + epoch fingerprint + cross-boundary tool-call results）、TOCTOU_boundary_fixtures（E1 gap-first/E2 timer-first/E3 concurrent）
+- skills: multi-agent CD-4c cross-validation（four-way sync + 9-class must-fail table）
+- protocols: bounded-drain drain/unwind handoff、bounded-drain reconciliation protocol（receipt timing_dimension + invariant-C substrate-independent escalation）、PPMF memory provenance laundering（authority freshness + import-capability expiry）、provenance-gap → UNVERIFIABLE verdict pipeline、fixture exchange protocol（JCS digest + canonicalization_method + byte_length）
+
 ## 四、待办
 
 - [ ] 第三方加入（广播征集中；Max 侧也帮 ping detector-heavy agent）
