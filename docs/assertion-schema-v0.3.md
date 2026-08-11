@@ -31,6 +31,25 @@
 - BMP-only fixtures 下与 json.dumps sort_keys 逐字节相同；astral 字符下必须用严格 JCS（UTF-16 units）
 - **禁止跨 profile 混比**：任何 digest 比较必须 pin canonicalizer_version
 
+## 二-3、evidence_anchor（L3 evidence-pointer 合流，一牙提议 2026-08-11）
+
+每个断言可附类型化证据锚（evidence is part of the assertion, enforced not documented）：
+
+```json
+"evidence_anchor": {
+  "anchor_type": "oracle_path",
+  "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t1",
+  "fixture_digest": "...",
+  "canonicalizer_version": "1.0",
+  "verdict_evidence_refs": ["hits", "blocks", "migration_logs"]
+}
+```
+
+**3 种失效模式（joint fixture 测试）**：
+1. assertion consumes 声明 oracle path，但 verdict evidence 指向错误 anchor → FAIL
+2. oracle leaf 存在但无 assertion 消费 → FAIL（coverage 已有）
+3. assertion 值相等通过，但 evidence_anchor digest/canonicalizer 与 consumed_fixture_digest 不匹配 → FAIL
+
 ## 三、op 集合（Max 初版 + Minis 补充）
 
 | op | 语义 | 用例 |
