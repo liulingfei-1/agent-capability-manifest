@@ -1,0 +1,72 @@
+# Cross-Runtime Comparability Matrix v2
+
+> Public, independently verifiable matrix for FIX-005 / FIX-006 cross-runtime verdicts.
+> 2026-08-11 — addresses Codex review blockers: full 64-char hashes, complete report
+> objects (public), env digests, and a named common assertion projection.
+
+## Canonicalization (all runners, all runtimes)
+
+- **JCS RFC 8785 strict** (canonicalizer_version=1.0): recursive NFC normalization,
+  compact JSON, code-point key sort, no trailing LF, SHA-256 lowercase hex.
+- FIX-005 note: runner uses UTF-8/LF, sort_keys+compact, no trailing LF, NFC mandatory
+  (JCS-ish non-strict for key ordering — strict JCS covered by T-JCS-001).
+
+## Minis (iSH Alpine, Linux-aarch64) — full reports (public)
+
+| Fixture | Runner v | Verdicts | input_digest (64) | output_digest (64) | env_digest (64) | Report |
+|---|---|---|---|---|---|---|
+| FIX-005 | fix005 v0.6 | 14/14 PASS | `8cd161245579bd42f9b7f121d5723acd2b553da9c1c4f20db772907763f8ade2` | `3fc70b9d6d11ac65b2740e47dd1e5919a72ce102afb1834201a0faf12f6830b9` | `4ea8eecbcc15a59e1b0284b0788e1baa45943fb3b841dded68f2f7a6a3060e40` | [fix005_v06_minis_report.json](../verdicts/fix005_v06_minis_report.json) |
+| FIX-006 | fix006 v0.6 | 12/12 PASS | `40efe29f2235709d57b00664857467d08cac0575ac2f0e5e802b526ee1442716` | `67ed23721a47ebb297c51c6aea663a2a4a82b474d6660f22bdf361262a13824c` | `4ea8eecbcc15a59e1b0284b0788e1baa45943fb3b841dded68f2f7a6a3060e40` | [fix006_v06_minis_report.json](../verdicts/fix006_v06_minis_report.json) |
+
+- runner_identity: `{"name":"minis","version":"0.6","runtime":"Linux-4.20.69-ish-aarch64-with..."}`
+- env_digest = sha256(JCS({"python": "<ver>", "platform": platform.platform()}))
+- output_digest FIX-005 = sha256(JCS({"verdicts": [...], "summary": {...}})) — **not** the
+  verdicts-array-only digest (Codex recomputed 9dc6180c… from the v0.5 verdicts array;
+  v0.6 report object adds summary → digest differs by design).
+
+## Common Assertion Projection (named predicates)
+
+Every runtime's verdicts are mapped onto this fixed predicate set. A runtime "passes a
+predicate" iff the corresponding assertion(s) in its report are all `pass: true`.
+
+### FIX-005 predicates
+
+| # | Predicate | Minis v0.6 evidence anchor |
+|---|---|---|
+| P1 | All coverage paths resolve (11/11) | event_type `coverage_paths_resolve` |
+| P2 | Canonical digest declared == recomputed | digest_report.input_digest == fixture canonical_digest |
+| P3 | Recursive NFC normalization applied (dict+list) | runner norm_digest source |
+| P4 | No identity mutation under state change | digest excludes mutable state (atom_id+content+initial_kind) |
+| P5 | Negative controls all blocked | negative_control assertions pass |
+
+### FIX-006 predicates
+
+| # | Predicate | Minis v0.6 evidence anchor |
+|---|---|---|
+| Q1 | Main scenario status matches oracle | scenario `main`, check `status_exact` |
+| Q2 | Identity digest invariant (id=A, content=boundary-probe) | check `identity_digest` |
+| Q3 | Promote count matches oracle | check `promote_count` |
+| Q4 | Tick semantics: delta, file order, accumulated elapsed | trace: admit@0ms → reference@3540000ms → aging_tick@3660000ms |
+| Q5 | Negative controls blocked | NEG-006-1/2/3 checks pass |
+| Q6 | Trace exact (time mutations fail) | oracle expected_trace == observed |
+
+## Other runtimes — status (public data required)
+
+| Runtime | FIX-005 | FIX-006 | Needed for full matrix |
+|---|---|---|---|
+| 小花花 (CD-4c) | 12/12 reported | 7/7 reported | full report objects + 64-char env/output digests |
+| Max (Windows 3.12) | 12/12 reported | 12/12 reported | full report objects + 64-char env/output digests |
+| 暖暖 (Windows 11) | — | 12/12 verified (commit 20886a8d) | report object + 64-char digests |
+
+**Claim:** Minis-side cross-runtime verification materials are complete and public.
+Cross-runtime PASS conclusion remains UNVERIFIED until 小花花 / Max publish full report
+objects with 64-char digests mapped onto the predicate sets above (P1–P5, Q1–Q6).
+
+## How to verify independently
+
+1. Clone: `git clone https://github.com/liulingfei-1/agent-capability-manifest`
+2. Pin: `git checkout <commit>` (latest main at time of writing: b9443931)
+3. Run (zero-dep, Python 3.8+):
+   `python3 runners/fix005_runner.py fixtures/FIX-005_aging_and_digest.json`
+   `python3 runners/fix006_runner.py fixtures/FIX-006_promote_after_aging_boundary.json`
+4. Compare output_digest + input_digest against the table above.
