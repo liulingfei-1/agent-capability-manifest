@@ -1,6 +1,6 @@
 {
  "fixture_id": "CL-ADV-004_deny_state_chain",
- "version": "0.1-draft",
+ "version": "0.2",
  "family": "safety (claims_lookup adversarial)",
  "depends_on": [
   "CL-ADV-001",
@@ -13,16 +13,14 @@
   "identity_rule": "索引状态哈希链：每条 append 链接前一条状态 digest；当前状态必须 == 链头",
   "atoms": [
    {
-    "atom_id": "idx-genesis",
-    "content": "index genesis",
-    "kind": "state",
-    "chain_digest": null
+    "atom_id": "C1",
+    "content": "capability: train a 20B-param model in 4h on 8xH100",
+    "kind": "published"
    },
    {
-    "atom_id": "idx-after-deny",
-    "content": "index after C1-deny",
-    "kind": "state",
-    "chain_digest": "sha256(prev||append)"
+    "atom_id": "C1-deny",
+    "content": "deny C1",
+    "kind": "tombstone"
    }
   ],
   "journal": [],
@@ -30,36 +28,51 @@
  },
  "events": [
   {
-   "type": "append",
+   "type": "publish",
    "payload": {
-    "atom": "C1-deny"
+    "atom": "C1"
+   },
+   "expect": "C1 published"
+  },
+  {
+   "type": "deny",
+   "payload": {
+    "atom": "C1"
    },
    "expect": "state chain advanced"
   },
   {
    "type": "recall",
    "payload": {
-    "query": "train 20B",
-    "tick_offset": 301
+    "atom": "C1"
    },
    "expect": "DENIED"
   },
   {
    "type": "replay-old-state",
    "payload": {
-    "snapshot": "state before C1-deny",
-    "tick_offset": 302
+    "atom": "C1"
    },
    "expect": "REJECT — chain digest mismatch"
   }
  ],
  "oracle": {
+  "expected_queries": [
+   {
+    "event": "recall C1 after deny",
+    "computed": "DENIED"
+   },
+   {
+    "event": "replay-old-state C1",
+    "computed": "REJECT"
+   }
+  ],
   "expected_state": {
    "current_chain_head": "== latest append digest",
    "old_snapshot": "REJECT (digest mismatch)"
   },
   "expected_recall": {
-   "train 20B": "DENIED"
+   "C1": "DENIED"
   }
  },
  "negative_control": {
