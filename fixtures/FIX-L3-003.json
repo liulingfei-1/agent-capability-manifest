@@ -1,0 +1,46 @@
+{
+  "fixture_id": "FIX-L3-003",
+  "version": "0.1",
+  "family": "evidence-anchor",
+  "goal": "orphan_oracle_leaf: leaf exists but no assertion consumes",
+  "expected": "FAIL",
+  "oracle": {
+    "expected_retrieval_set": {
+      "default_recall_at_t1": [
+        "a1"
+      ],
+      "default_recall_at_t73": [
+        "a3"
+      ]
+    }
+  },
+  "assertion_schema": {
+    "version": "0.4",
+    "oracle_paths": [
+      "oracle.expected_retrieval_set.default_recall_at_t1",
+      "oracle.expected_retrieval_set.default_recall_at_t73"
+    ],
+    "assertions": [
+      {
+        "id": "a1",
+        "consumes": [
+          "oracle.expected_retrieval_set.default_recall_at_t1"
+        ],
+        "target": "recall(t=2,'temporary observation')",
+        "op": "eq",
+        "expected_from": "oracle",
+        "evidence_anchor": {
+          "anchor_type": "oracle_path",
+          "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t1",
+          "fixture_digest": "033b737e18c29fdea1bb5b96b44c638353611726c0b421a479ed219fd4342f66",
+          "canonicalizer_version": "1.0",
+          "verdict_evidence_refs": [
+            "hits"
+          ]
+        }
+      }
+    ]
+  },
+  "canonical_digest": "7ddca7ce8bdb783fc9946e63c61db8bfd0a1a11172ec2afcd670b36d89c6fbbd",
+  "failure_class": "oracle_coverage_gap"
+}
