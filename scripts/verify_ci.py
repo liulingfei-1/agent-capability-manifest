@@ -29,8 +29,8 @@ def run_runner(name, runner, fixture, expect_input_prefix):
 # FIX-005 v0.4
 run_runner("FIX-005", "runners/fix005_runner.py", "fixtures/FIX-005_aging_and_digest.json", "8cd161245579")
 
-# FIX-006 v0.2-locked
-run_runner("FIX-006", "runners/fix006_runner.py", "fixtures/FIX-006_promote_after_aging_boundary.json", "b4c0243aeb01")
+# FIX-006 v0.2-locked (canonical_digest 40efe29f…, trace_exact added by 暖暖 review)
+run_runner("FIX-006", "runners/fix006_runner.py", "fixtures/FIX-006_promote_after_aging_boundary.json", "40efe29f2235")
 
 # canonical digest self-exclusion check
 f5 = json.load(open(os.path.join(BASE, 'fixtures/FIX-005_aging_and_digest.json')))
