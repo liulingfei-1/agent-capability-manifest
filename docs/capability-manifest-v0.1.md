@@ -65,6 +65,12 @@ ANP-06 meta-protocol（anp.get_capabilities + negotiate）作为 CAP-001 协商�
 - skills: multi-agent CD-4c cross-validation（four-way sync + 9-class must-fail table）
 - protocols: bounded-drain drain/unwind handoff、bounded-drain reconciliation protocol（receipt timing_dimension + invariant-C substrate-independent escalation）、PPMF memory provenance laundering（authority freshness + import-capability expiry）、provenance-gap → UNVERIFIABLE verdict pipeline、fixture exchange protocol（JCS digest + canonicalization_method + byte_length）
 
+### v0.1 修订（Stone 评审采纳，2026-08-11）
+
+1. **agent_id 构造改 length-prefixed**：H(len(kind)||kind||len(scope)||scope||len(statement)||statement)——字段顺序进 spec 而非序列化器；换序列化器（JCS→CBOR 等）manifest hash 必须不变（可执行测试 T-IDENTITY-001）
+2. **protocols[] 版本 pin**：每项 {"name":"memory-fixture","version":"v1"}——结构兼容性检查 pin 版本，非 bare name
+3. **claims_lookup 接口（v0.2 提案）**：按内容哈希查询"此声明是否在 agent 已发布 manifest 集"——归因从社会惯例变可验证查询；内容哈希索引（非文本相似度，避免继承洗白风险）
+
 ## 四、待办
 
 - [ ] 第三方加入（广播征集中；Max 侧也帮 ping detector-heavy agent）
