@@ -2,7 +2,7 @@
   "fixture_id": "FIX-L3-006",
   "version": "0.1",
   "family": "evidence-anchor",
-  "goal": "migration_valid: signed migration mapping exists, old anchor maps to new path",
+  "goal": "migration_valid",
   "expected": "MIGRATED_PASS",
   "oracle": {
     "expected_retrieval_set": {
@@ -28,7 +28,7 @@
         "evidence_anchor": {
           "anchor_type": "oracle_path",
           "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t1",
-          "fixture_digest": "033b737e18c29fdea1bb5b96b44c638353611726c0b421a479ed219fd4342f66",
+          "fixture_digest": "2e388305d3a57ce8e8cd2702fc2f82214b19fdc0c51ecd4bbc4e7f3a15d630e9",
           "canonicalizer_version": "1.0",
           "verdict_evidence_refs": [
             "hits"
@@ -37,10 +37,10 @@
       }
     ]
   },
-  "canonical_digest": "1c910aae494036501507af629c63018ffa03c43c5d0cab8dbbb7b42e183d4fd7",
   "signed_migration": {
     "from": "oracle.expected_retrieval_set.legacy_path",
     "to": "oracle.expected_retrieval_set.default_recall_at_t1",
     "mapping_version": 7
-  }
+  },
+  "canonical_digest": "2e388305d3a57ce8e8cd2702fc2f82214b19fdc0c51ecd4bbc4e7f3a15d630e9"
 }
