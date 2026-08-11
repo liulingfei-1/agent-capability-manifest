@@ -111,7 +111,13 @@ def run_scenario(name, events, exp, atoms_init):
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else '/var/minis/workspace/regression-pack/FIX-006_promote_after_aging_boundary.json'
     fixture = json.load(open(path))
-    input_digest = norm_digest(fixture)
+    # canonical_digest validation FIRST (self-excluded, Codex review)
+    declared = fixture.get('canonical_digest')
+    if declared:
+        digest_input = {k: v for k, v in fixture.items() if k != 'canonical_digest'}
+        actual = norm_digest(digest_input)
+        assert actual == declared, f"canonical_digest mismatch: declared={declared[:16]} actual={actual[:16]}"
+    input_digest = actual if declared else norm_digest(fixture)
     atoms_init = fixture['manifest']['atoms']
     all_v = []
     # main scenario from manifest.events
@@ -124,8 +130,9 @@ def main():
         "runner_identity": {"name": "minis", "version": "0.4", "runtime": "iSH Alpine aarch64",
                             "env_digest": short(norm_digest({"python": sys.version.split()[0]}))},
         "verdicts": all_v, "summary": summary,
-        "digest_report": {"input_digest": short(input_digest), "output_digest": short(norm_digest({"verdicts": all_v, "summary": summary})),
-                          "normalization": "UTF-8/LF (JCS-ish, non-strict)"},
+        "digest_report": {"input_digest": norm_digest(fixture),
+                          "output_digest": norm_digest({"verdicts": all_v, "summary": summary}),
+                          "normalization": "UTF-8/LF (JCS-ish, non-strict)", "canonicalizer_version": "1.0"},
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
