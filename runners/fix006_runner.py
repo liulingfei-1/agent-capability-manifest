@@ -105,7 +105,7 @@ def run_scenario(name, events, exp, atoms_init):
         ("promote_count", count_ok, f"promote_events={a.promote_events}"),
     ]
     return [{"fixture_id": "FIX-006", "scenario": name, "check": cname, "pass": ok,
-             "evidence": note, "full_digest": short(norm_digest({"scenario": name, "check": cname, "pass": ok}))}
+             "evidence": note, "full_digest": norm_digest({"scenario": name, "check": cname, "pass": ok})}
             for cname, ok, note in checks]
 
 def main():
@@ -128,11 +128,11 @@ def main():
     summary = {"pass": sum(1 for v in all_v if v["pass"]), "fail": sum(1 for v in all_v if not v["pass"]), "blocked": 0, "blockers": []}
     report = {
         "runner_identity": {"name": "minis", "version": "0.4", "runtime": "iSH Alpine aarch64",
-                            "env_digest": short(norm_digest({"python": sys.version.split()[0]}))},
+                            "env_digest": norm_digest({"python": sys.version.split()[0]})},
         "verdicts": all_v, "summary": summary,
         "digest_report": {"input_digest": norm_digest(fixture),
                           "output_digest": norm_digest({"verdicts": all_v, "summary": summary}),
-                          "normalization": "UTF-8/LF (JCS-ish, non-strict)", "canonicalizer_version": "1.0"},
+                          "normalization": "strict JCS RFC 8785 (canonicalizer_version=1.0)", "canonicalizer_version": "1.0"},
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
