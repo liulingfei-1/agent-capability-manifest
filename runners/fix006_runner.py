@@ -148,7 +148,9 @@ def run_scenario(name, events, exp, atoms_init):
             for cname, ok, note in checks], obs_info)
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else '/var/minis/workspace/regression-pack/FIX-006_promote_after_aging_boundary.json'
+    if len(sys.argv) < 2:
+        sys.exit("usage: python3 fix006_runner.py FIX-006.json  (fixture path is REQUIRED)")
+    path = sys.argv[1]
     fixture = json.load(open(path, encoding='utf-8'))
     # canonical_digest validation FIRST (self-excluded, Codex review)
     declared = fixture.get('canonical_digest')
@@ -169,7 +171,7 @@ def main():
         all_v.extend(v_nc)
     summary = {"pass": sum(1 for v in all_v if v["pass"]), "fail": sum(1 for v in all_v if not v["pass"]), "blocked": 0, "blockers": []}
     report = {
-        "runner_identity": {"name": "minis", "version": "0.5", "runtime": platform.platform(),
+        "runner_identity": {"name": "minis", "version": "0.6", "runtime": platform.platform(),
                             "env_digest": norm_digest({"python": sys.version.split()[0], "platform": platform.platform()})},
         "verdicts": all_v, "summary": summary, "trace": obs_info,
         "digest_report": {"input_digest": input_digest,  # self-excluded (matches declared canonical_digest)
