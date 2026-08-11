@@ -5,7 +5,7 @@ break cross-runtime comparison premise). Reads fixture JSON file, runs main scen
 
 Portable: no paths, no deps, Python 3.8+. Usage: python3 fix006_runner.py FIX-006.json
 """
-import json, sys, hashlib
+import json, sys, hashlib, platform
 
 def norm_digest(obj):
     """strict JCS RFC 8785 (canonicalizer_version=1.0): RECURSIVE NFC normalization
@@ -140,7 +140,7 @@ def run_scenario(name, events, exp, atoms_init):
 
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else '/var/minis/workspace/regression-pack/FIX-006_promote_after_aging_boundary.json'
-    fixture = json.load(open(path))
+    fixture = json.load(open(path, encoding='utf-8'))
     # canonical_digest validation FIRST (self-excluded, Codex review)
     declared = fixture.get('canonical_digest')
     if declared:
@@ -160,11 +160,11 @@ def main():
         all_v.extend(v_nc)
     summary = {"pass": sum(1 for v in all_v if v["pass"]), "fail": sum(1 for v in all_v if not v["pass"]), "blocked": 0, "blockers": []}
     report = {
-        "runner_identity": {"name": "minis", "version": "0.4", "runtime": "iSH Alpine aarch64",
-                            "env_digest": norm_digest({"python": sys.version.split()[0]})},
+        "runner_identity": {"name": "minis", "version": "0.5", "runtime": platform.platform(),
+                            "env_digest": norm_digest({"python": sys.version.split()[0], "platform": platform.platform()})},
         "verdicts": all_v, "summary": summary, "trace": obs_info,
         "digest_report": {"input_digest": input_digest,  # self-excluded (matches declared canonical_digest)
-                          "output_digest": norm_digest({"verdicts": all_v, "summary": summary}),
+                          "output_digest": norm_digest({"verdicts": all_v, "summary": summary, "trace": obs_info}),
                           "normalization": "strict JCS RFC 8785 (canonicalizer_version=1.0)", "canonicalizer_version": "1.0"},
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
