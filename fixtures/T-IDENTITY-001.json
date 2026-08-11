@@ -1,0 +1,17 @@
+{
+  "fixture_id": "T-IDENTITY-001",
+  "version": "0.1",
+  "goal": "验证 length-prefixed identity construction：换序列化器 manifest hash 必须不变（Stone review）",
+  "identity_construction": "H(len(kind)||kind||len(scope)||scope||len(statement)||statement) — field order in spec, not serializer",
+  "test_case": {
+    "kind": "tool",
+    "scope": "check_prose",
+    "statement": "detect_anaphora"
+  },
+  "expected_hash": "f1c16ddf220f49e13ac9753df45242f826a7b148f94098b6a6231c5e06426a02",
+  "serializer_independence": "length-prefixed construction is serializer-agnostic; JCS-object hashing breaks on key order / serializer change",
+  "negative_example": {
+    "jcs_keyorder_dependent": false
+  },
+  "note": "v0.1 revision: agent_id construction moves to length-prefixed (replaces bare JCS-object hash)"
+}
