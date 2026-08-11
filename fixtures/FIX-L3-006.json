@@ -1,0 +1,46 @@
+{
+  "fixture_id": "FIX-L3-006",
+  "version": "0.1",
+  "family": "evidence-anchor",
+  "goal": "migration_valid: signed migration mapping exists, old anchor maps to new path",
+  "expected": "MIGRATED_PASS",
+  "oracle": {
+    "expected_retrieval_set": {
+      "default_recall_at_t1": [
+        "a1"
+      ]
+    }
+  },
+  "assertion_schema": {
+    "version": "0.4",
+    "oracle_paths": [
+      "oracle.expected_retrieval_set.default_recall_at_t1"
+    ],
+    "assertions": [
+      {
+        "id": "a1",
+        "consumes": [
+          "oracle.expected_retrieval_set.default_recall_at_t1"
+        ],
+        "target": "recall(t=2,'temporary observation')",
+        "op": "eq",
+        "expected_from": "oracle",
+        "evidence_anchor": {
+          "anchor_type": "oracle_path",
+          "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t1",
+          "fixture_digest": "033b737e18c29fdea1bb5b96b44c638353611726c0b421a479ed219fd4342f66",
+          "canonicalizer_version": "1.0",
+          "verdict_evidence_refs": [
+            "hits"
+          ]
+        }
+      }
+    ]
+  },
+  "canonical_digest": "1c910aae494036501507af629c63018ffa03c43c5d0cab8dbbb7b42e183d4fd7",
+  "signed_migration": {
+    "from": "oracle.expected_retrieval_set.legacy_path",
+    "to": "oracle.expected_retrieval_set.default_recall_at_t1",
+    "mapping_version": 7
+  }
+}
