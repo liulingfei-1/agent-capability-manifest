@@ -22,7 +22,7 @@
 | 期望值 | fixture `oracle.expected_*` | oracle/disposition expected path | 期望值只从 oracle 读取，不能硬编码进 runner |
 | 实际值 | runner `verdicts[]`、`trace`、`observations` | receipt actual / disposition trace | 必须保留 expected vs actual，不只输出 PASS/FAIL |
 | 分歧 | `divergence`（矩阵公共断言 + expected/actual） | `divergence` | 最小字段：`path`, `expected`, `actual`, `failure_class` |
-| 证据状态 | `PASS` / `FAIL` / `UNVERIFIED` / `UNCLASSIFIED` | `PASS` / `INDET` / `FAIL` / `UNKNOWN` / `MISALIGNED`（对方实现可扩展） | 单向映射：PASS↔PASS，FAIL↔FAIL，UNVERIFIED↔INDET，未跑↔UNKNOWN，范围外↔UNCLASSIFIED/MISALIGNED |
+| 证据状态 | `PASS` / `FAIL` / `UNVERIFIED` / `UNCLASSIFIED` | CD-4c profiles differ: 6-field uses `PASS/INDET/FAIL/UNKNOWN/UNCLASSIFIED`; bounded-drain uses `PASS/INDET/FAIL/UNKNOWN/MISALIGNED` | 共同部分单向映射：PASS↔PASS，FAIL↔FAIL，UNVERIFIED↔INDET，未跑↔UNKNOWN。`UNCLASSIFIED` 与 `MISALIGNED` **不得跨 profile 自动等同**：前者是分类法无锚点/范围外，后者是 bounded-drain 映射不一致；必须携带 taxonomy profile + typed trigger |
 | 执行处置 | `ACTIVE` / `REJECT` / `HOLD+fence` | gate/disposition（如 `GATE_DENIED` / `UNBOUNDED`） | `UNVERIFIED` 不得降级成语义 FAIL；处置层单独记录 fence |
 | epoch | `epoch` / `execution_epoch`（FIX-006 trace/authority） | `epoch_context.fence_epoch` | 必须绑定 receipt；epoch 不同不得声称同一运行结果 |
 | 策略版本 | `policy_version`（重评估键） | policy/mapping version | register/policy 变化走版本重评估，不逐原子伪造撤回 |
