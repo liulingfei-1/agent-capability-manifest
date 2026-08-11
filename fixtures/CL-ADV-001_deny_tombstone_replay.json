@@ -1,6 +1,6 @@
 {
  "fixture_id": "CL-ADV-001_deny_tombstone_replay",
- "version": "0.1-draft",
+ "version": "0.2",
  "family": "safety (claims_lookup adversarial)",
  "depends_on": [
   "FIX-001_tombstone_audit",
@@ -10,11 +10,11 @@
  "date": "2026-08-11",
  "manifest": {
   "goal": "作者发布 claim C 后 deny C；查询必须确定性返回 DENIED；deny 前索引快照重放不得让 C 重新 ALLOWED",
-  "identity_rule": "claim_hash = sha256(canonical(statement))；deny tombstone 键 = claim_hash（内容哈希，非文本）；索引 append-only",
+  "identity_rule": "claim_hash = sha256(canonical({statement})); deny tombstone 键 = claim_hash（内容哈希，非文本）；索引 append-only",
   "atoms": [
    {
     "atom_id": "C1",
-    "content": "capability: train 20B in 4h",
+    "content": "capability: train a 20B-param model in 4h on 8xH100",
     "kind": "published"
    },
    {
@@ -38,43 +38,50 @@
   {
    "type": "deny",
    "payload": {
-    "atom": "C1-deny",
-    "claim_hash": "f40a00769acfed594f235b28a1b3c9b3a2669e53a7b2f319d1e0cbc07925f9b6"
+    "atom": "C1",
+    "claim_hash": "C1"
    },
    "expect": "deny recorded append-only"
   },
   {
    "type": "recall",
    "payload": {
-    "query": "capability: train 20B in 4h",
-    "tick_offset": 301
+    "atom": "C1"
    },
    "expect": "DENIED (deterministic) — tombstone keyed by claim_hash"
   },
   {
    "type": "replay-snapshot",
    "payload": {
-    "snapshot": "pre-deny index state",
-    "tick_offset": 302
+    "atom": "C1"
    },
    "expect": "REJECT — append-only violated"
   }
  ],
  "oracle": {
+  "expected_queries": [
+   {
+    "event": "recall C1",
+    "computed": "DENIED"
+   },
+   {
+    "event": "replay-snapshot C1",
+    "computed": "REJECT"
+   }
+  ],
   "expected_recall": [
    {
-    "query": "train 20B",
+    "atom": "C1",
     "result": "DENIED",
     "note": "deny tombstone deterministic"
    },
    {
-    "query": "pre-deny snapshot",
-    "result": "REJECT",
+    "snapshot_replay": "REJECT",
     "note": "append-only monotonic"
    }
   ],
   "expected_identity": {
-   "C1_hash == C1-deny claim_hash": true
+   "C1 claim_hash == deny tombstone key": true
   }
  },
  "negative_control": {
