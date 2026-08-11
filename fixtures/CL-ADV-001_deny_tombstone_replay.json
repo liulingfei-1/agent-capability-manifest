@@ -1,0 +1,86 @@
+{
+ "fixture_id": "CL-ADV-001_deny_tombstone_replay",
+ "version": "0.1-draft",
+ "family": "safety (claims_lookup adversarial)",
+ "depends_on": [
+  "FIX-001_tombstone_audit",
+  "FIX-008_direction_mixing"
+ ],
+ "co_defined_with": "Stone (replay adversarial), Minis (fixture shape)",
+ "date": "2026-08-11",
+ "manifest": {
+  "goal": "作者发布 claim C 后 deny C；查询必须确定性返回 DENIED；deny 前索引快照重放不得让 C 重新 ALLOWED",
+  "identity_rule": "claim_hash = sha256(canonical(statement))；deny tombstone 键 = claim_hash（内容哈希，非文本）；索引 append-only",
+  "atoms": [
+   {
+    "atom_id": "C1",
+    "content": "capability: train 20B in 4h",
+    "kind": "published"
+   },
+   {
+    "atom_id": "C1-deny",
+    "content": "deny C1",
+    "kind": "tombstone",
+    "deny_of": "C1"
+   }
+  ],
+  "journal": [],
+  "authority_epoch": 300
+ },
+ "events": [
+  {
+   "type": "publish",
+   "payload": {
+    "atom": "C1"
+   },
+   "expect": "C1 ALLOWED at recall"
+  },
+  {
+   "type": "deny",
+   "payload": {
+    "atom": "C1-deny",
+    "claim_hash": "f40a00769acfed594f235b28a1b3c9b3a2669e53a7b2f319d1e0cbc07925f9b6"
+   },
+   "expect": "deny recorded append-only"
+  },
+  {
+   "type": "recall",
+   "payload": {
+    "query": "capability: train 20B in 4h",
+    "tick_offset": 301
+   },
+   "expect": "DENIED (deterministic) — tombstone keyed by claim_hash"
+  },
+  {
+   "type": "replay-snapshot",
+   "payload": {
+    "snapshot": "pre-deny index state",
+    "tick_offset": 302
+   },
+   "expect": "REJECT — append-only violated"
+  }
+ ],
+ "oracle": {
+  "expected_recall": [
+   {
+    "query": "train 20B",
+    "result": "DENIED",
+    "note": "deny tombstone deterministic"
+   },
+   {
+    "query": "pre-deny snapshot",
+    "result": "REJECT",
+    "note": "append-only monotonic"
+   }
+  ],
+  "expected_identity": {
+   "C1_hash == C1-deny claim_hash": true
+  }
+ },
+ "negative_control": {
+  "action": "replay pre-deny snapshot to resurrect C1",
+  "allowed": false,
+  "blocked_by": "append-only tombstone (claim_hash key) — same failure class as FIX-007 tombstone-resurrection"
+ },
+ "semantics_note": "Stone ①: 作者已否认的 claim 查询必须确定性返回否认 → 索引 append-only + claim_hash 键；重放 deny 前状态 = FIX-007 同族（复活已撤销权威）。"
+}
