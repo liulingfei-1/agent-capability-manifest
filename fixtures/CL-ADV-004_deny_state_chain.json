@@ -1,0 +1,71 @@
+{
+ "fixture_id": "CL-ADV-004_deny_state_chain",
+ "version": "0.1-draft",
+ "family": "safety (claims_lookup adversarial)",
+ "depends_on": [
+  "CL-ADV-001",
+  "digest-test-vectors"
+ ],
+ "co_defined_with": "Minis (addition)",
+ "date": "2026-08-11",
+ "manifest": {
+  "goal": "攻击者回滚索引到 deny 之前的状态 → 状态链 digest 不匹配 → REJECT",
+  "identity_rule": "索引状态哈希链：每条 append 链接前一条状态 digest；当前状态必须 == 链头",
+  "atoms": [
+   {
+    "atom_id": "idx-genesis",
+    "content": "index genesis",
+    "kind": "state",
+    "chain_digest": null
+   },
+   {
+    "atom_id": "idx-after-deny",
+    "content": "index after C1-deny",
+    "kind": "state",
+    "chain_digest": "sha256(prev||append)"
+   }
+  ],
+  "journal": [],
+  "authority_epoch": 300
+ },
+ "events": [
+  {
+   "type": "append",
+   "payload": {
+    "atom": "C1-deny"
+   },
+   "expect": "state chain advanced"
+  },
+  {
+   "type": "recall",
+   "payload": {
+    "query": "train 20B",
+    "tick_offset": 301
+   },
+   "expect": "DENIED"
+  },
+  {
+   "type": "replay-old-state",
+   "payload": {
+    "snapshot": "state before C1-deny",
+    "tick_offset": 302
+   },
+   "expect": "REJECT — chain digest mismatch"
+  }
+ ],
+ "oracle": {
+  "expected_state": {
+   "current_chain_head": "== latest append digest",
+   "old_snapshot": "REJECT (digest mismatch)"
+  },
+  "expected_recall": {
+   "train 20B": "DENIED"
+  }
+ },
+ "negative_control": {
+  "action": "rollback index to pre-deny state",
+  "allowed": false,
+  "blocked_by": "state chain digest (append-only, links prev)"
+ },
+ "semantics_note": "补充④: 否认记录本身可被重放（回滚索引状态）→ 状态哈希链。与 env_digest/output_digest 链式、6-field row_digest 同一思想。"
+}
