@@ -2,12 +2,15 @@
   "fixture_id": "FIX-L3-002",
   "version": "0.1",
   "family": "evidence-anchor",
-  "goal": "wrong_anchor: evidence points to sibling leaf",
+  "goal": "wrong_anchor",
   "expected": "FAIL",
   "oracle": {
     "expected_retrieval_set": {
       "default_recall_at_t1": [
         "a1"
+      ],
+      "default_recall_at_t7": [
+        "a2"
       ]
     }
   },
@@ -29,7 +32,7 @@
         "evidence_anchor": {
           "anchor_type": "oracle_path",
           "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t7",
-          "fixture_digest": "033b737e18c29fdea1bb5b96b44c638353611726c0b421a479ed219fd4342f66",
+          "fixture_digest": "25c4375cb0200299f5f4517eb6020fdb8a06e48272c43937c4ebed840b6793cd",
           "canonicalizer_version": "1.0",
           "verdict_evidence_refs": [
             "hits"
@@ -38,6 +41,6 @@
       }
     ]
   },
-  "canonical_digest": "df85f3821c0b33fc45262547e4374e1786656417211b3502dff68556ea59bfcd",
-  "failure_class": "evidence_anchor_mismatch"
+  "failure_class": "evidence_anchor_mismatch",
+  "canonical_digest": "25c4375cb0200299f5f4517eb6020fdb8a06e48272c43937c4ebed840b6793cd"
 }
