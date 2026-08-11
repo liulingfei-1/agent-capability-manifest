@@ -1,0 +1,42 @@
+{
+  "fixture_id": "FIX-L3-005",
+  "version": "0.1",
+  "family": "evidence-anchor",
+  "goal": "canonicalizer_drift: different canonicalizer_version without signed migration",
+  "expected": "UNVERIFIED",
+  "oracle": {
+    "expected_retrieval_set": {
+      "default_recall_at_t1": [
+        "a1"
+      ]
+    }
+  },
+  "assertion_schema": {
+    "version": "0.4",
+    "oracle_paths": [
+      "oracle.expected_retrieval_set.default_recall_at_t1"
+    ],
+    "assertions": [
+      {
+        "id": "a1",
+        "consumes": [
+          "oracle.expected_retrieval_set.default_recall_at_t1"
+        ],
+        "target": "recall(t=2,'temporary observation')",
+        "op": "eq",
+        "expected_from": "oracle",
+        "evidence_anchor": {
+          "anchor_type": "oracle_path",
+          "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t1",
+          "fixture_digest": "033b737e18c29fdea1bb5b96b44c638353611726c0b421a479ed219fd4342f66",
+          "canonicalizer_version": "0.9",
+          "verdict_evidence_refs": [
+            "hits"
+          ]
+        }
+      }
+    ]
+  },
+  "canonical_digest": "97c1501d65510430fdcd8cd7a354c5dcbcd6fe48b4eb6167dc97f96382fecef2",
+  "failure_class": "canonicalizer_version_mismatch"
+}
