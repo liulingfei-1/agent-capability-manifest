@@ -1,0 +1,72 @@
+{
+ "fixture_id": "CL-ADV-005_setroot_epoch",
+ "version": "0.1-draft",
+ "family": "safety (claims_lookup adversarial)",
+ "depends_on": [
+  "MEMORY_SCHEMA_v0.6",
+  "FIX-003_dependency_invalidation"
+ ],
+ "co_defined_with": "Minis (addition)",
+ "date": "2026-08-11",
+ "manifest": {
+  "goal": "作者轮换密钥后旧 set-root 签名查询结果必须 UNVERIFIED 而非 ALLOWED/DENIED",
+  "identity_rule": "签名带 epoch 锚点；过期 → REVALIDATION_PENDING → fence（复用 execution_authority 状态机）",
+  "atoms": [
+   {
+    "atom_id": "A-root-v1",
+    "content": "A set-root signed @ epoch 100",
+    "kind": "signed-root",
+    "epoch": 100
+   },
+   {
+    "atom_id": "A-root-v2",
+    "content": "A set-root signed @ epoch 300",
+    "kind": "signed-root",
+    "epoch": 300
+   }
+  ],
+  "journal": [],
+  "authority_epoch": 300
+ },
+ "events": [
+  {
+   "type": "query",
+   "payload": {
+    "target": "A",
+    "query": "P",
+    "sig_epoch": 100,
+    "tick_offset": 301
+   },
+   "expect": "UNVERIFIED — signature epoch < authority_epoch (300)"
+  },
+  {
+   "type": "query",
+   "payload": {
+    "target": "A",
+    "query": "P",
+    "sig_epoch": 300,
+    "tick_offset": 302
+   },
+   "expect": "verifiable — current epoch"
+  }
+ ],
+ "oracle": {
+  "expected_execution": [
+   {
+    "action": "query with epoch-100 signature after rotation",
+    "allowed": false,
+    "result": "UNVERIFIED + REVALIDATION_PENDING"
+   },
+   {
+    "action": "query with epoch-300 signature",
+    "allowed": true
+   }
+  ]
+ },
+ "negative_control": {
+  "action": "reuse rotated-away set-root signature",
+  "allowed": false,
+  "blocked_by": "epoch-anchored signature (ACTIVE→REVALIDATION_PENDING→fence)"
+ },
+ "semantics_note": "补充⑤: set-root 过期签名（密钥轮换后旧签名）→ epoch 锚点 + REVALIDATION_PENDING，与 FIX-003 dependency invalidation 同族。"
+}
