@@ -10,13 +10,13 @@
   },
   "profiles": {
     "description_identity": "jcs-description/v1",
-    "distribution_manifest": "jcs-distribution/v1-proposed-set-order",
+    "distribution_manifest": "jcs-distribution/v1-ordered-sequence",
     "policy": "jcs-policy/v1",
     "canonicalization": "JCS-compatible for string/list/object-only fixtures + recursive NFC"
   },
   "manifest": {
     "goal": "Verify description/distribution/policy immutability and keep authorization in append-only receipts.",
-    "ordering_semantics": "capabilities are a set; sort lowercase 64hex identities ascending before digest",
+    "ordering_semantics": "capabilities are an ordered sequence; preserve declared order in digest",
     "security_boundary": {
       "fixture_is_data_only": true,
       "network_calls_required": false,
@@ -75,15 +75,15 @@
           "public-read",
           "fixture-replay-permitted"
         ],
-        "ordering_semantics": "set:sort-lowercase-identity-hex-ascending"
+        "ordering_semantics": "ordered-sequence: declared order is digest-significant"
       },
       "v1_reordered_input": {
         "manifest_id": "manifest:minis-public-capabilities",
         "version": "0.2-proposed",
         "policy_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
         "capabilities": [
-          "02131517c942534200d38b776cdbddaebf9a43b91f56a8397c1382f61adcad0f",
-          "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6"
+          "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6",
+          "02131517c942534200d38b776cdbddaebf9a43b91f56a8397c1382f61adcad0f"
         ],
         "licenses": [
           "MIT"
@@ -92,7 +92,7 @@
           "public-read",
           "fixture-replay-permitted"
         ],
-        "ordering_semantics": "set:sort-lowercase-identity-hex-ascending"
+        "ordering_semantics": "ordered-sequence: declared order is digest-significant"
       },
       "v2": {
         "manifest_id": "manifest:minis-public-capabilities",
@@ -109,14 +109,14 @@
           "public-read",
           "fixture-replay-permitted"
         ],
-        "ordering_semantics": "set:sort-lowercase-identity-hex-ascending"
+        "ordering_semantics": "ordered-sequence: declared order is digest-significant"
       }
     },
     "receipts": {
       "grant_v1": {
         "receipt_type": "CAPABILITY_GRANT",
         "capability_identity": "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6",
-        "manifest_digest": "1505b6f8fd2be1ac2e5de2eb803ff08a909b665e6e6b48920dacca216530778f",
+        "manifest_digest": "b2924f199532da3ce2a7a255c8e768976cede1b4d0712e9968864bc1680b5f50",
         "policy_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
         "epoch": 100,
         "policy_version": "1",
@@ -127,13 +127,13 @@
       "revoke_v1": {
         "receipt_type": "CAPABILITY_REVOKE",
         "capability_identity": "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6",
-        "manifest_digest": "1505b6f8fd2be1ac2e5de2eb803ff08a909b665e6e6b48920dacca216530778f",
+        "manifest_digest": "b2924f199532da3ce2a7a255c8e768976cede1b4d0712e9968864bc1680b5f50",
         "policy_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
         "epoch": 101,
         "policy_version": "1",
         "evidence_state": "PASS",
         "operational_disposition": "REJECT",
-        "previous_receipt_digest": "8bcdb32a854fb5bb7ec95f27841c176f46574591c74b0a1861ff4924a8c706eb"
+        "previous_receipt_digest": "6161867005a8b32441fac7de64af85748a73326f3047ebf789c07d83711b0f3f"
       }
     },
     "negative_controls": {
@@ -190,7 +190,7 @@
       "description_identity_unchanged_by_grant_revoke": true,
       "policy_digest_changes_v1_to_v2": true,
       "manifest_digest_changes_when_policy_changes": true,
-      "manifest_digest_stable_under_capability_input_reorder": true,
+      "manifest_digest_changes_when_capability_order_changes": true,
       "old_grant_after_policy_bump": {
         "evidence_state": "INDET",
         "operational_disposition": "HOLD"
@@ -199,6 +199,6 @@
       "three_immutable_domains_exclude_authorization_state": true
     }
   },
-  "semantics_note": "This fixture proposes set-order canonicalization locally; peer review must confirm whether capabilities is a set or ordered sequence before shared-core lock.",
-  "canonical_digest": "005abf8446d8d2a9b8d3cfd9a1a3cdecd95dd14ee260f4cd7cf13325ec52464d"
+  "semantics_note": "Peer review resolved capability ordering: capabilities is an ordered sequence; declared order is digest-significant. The capability_id formula remains subject to a non-circular construction clarification before shared-core lock.",
+  "canonical_digest": "59d9a8ec698d27f2fab12e6f607846bbfd38d5895b4b894b7258815307d06f58"
 }
