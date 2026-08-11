@@ -1,0 +1,48 @@
+{
+  "fixture_id": "FIX-008_direction_mixing",
+  "version": "0.1-draft",
+  "family": "safety (direction-mixing)",
+  "depends_on": ["FIX-007_bounded_recovery", "DIRECTION_v0.2_draft"],
+  "co_defined_with": "Munin (supersession/effect-admission, idempotency-key direction-mixing), 凯瑞 (tombstone monotonic)",
+  "date": "2026-08-11",
+  "manifest": {
+    "goal": "验证 direction 语义：demote 重放为 promote 必须 BLOCKED（不复活已撤销权威）；同原子 promote/demote 是不同身份（direction 进 identity）；supersession 谱系（demote supersedes prior promote，re-promote supersedes demote）",
+    "identity_rule": "identity = sha256(canonical(atom_id + content + direction + initial_kind)), direction ∈ {promote, demote, neutral}",
+    "atoms": [
+      {"atom_id": "d1", "content": "grant-spec:read-staging", "direction": "promote", "kind": "ephemeral", "bucket": "24h"},
+      {"atom_id": "d2", "content": "grant-spec:read-staging", "direction": "demote", "kind": "ephemeral", "bucket": "24h"},
+      {"atom_id": "d3", "content": "read-path-recall", "direction": "neutral", "kind": "durable"}
+    ],
+    "journal": [],
+    "authority_epoch": 300
+  },
+  "events": [
+    {"type": "admit", "payload": {"atom": "d1 (promote)"}, "expect": "d1 identity distinct from d2 (direction in identity), no collision"},
+    {"type": "admit", "payload": {"atom": "d2 (demote)"}, "expect": "d2 identity distinct from d1 — same atom_id+content, opposite direction = different identity"},
+    {"type": "execute", "payload": {"atom": "d1", "action": "grant read-staging", "epoch": 301}, "expect": "d1 (promote) CONFIRMS admission"},
+    {"type": "execute", "payload": {"atom": "d2", "action": "revoke read-staging", "epoch": 302}, "expect": "d2 (demote) BLOCKS/revokes admission"},
+    {"type": "replay", "payload": {"atom": "d2", "as": "d1", "epoch": 303}, "expect": "BLOCKED — demote cannot replay as promote retry (idempotency key must not mix directions)"},
+    {"type": "recall", "payload": {"query": "grant read-staging", "tick_offset": 304}, "expect": "no active grant — demote superseded the promote (lineage)"}
+  ],
+  "oracle": {
+    "expected_identity": {
+      "d1_digest != d2_digest": true,
+      "note": "same atom_id+content, opposite direction -> different identity (direction in canonical)",
+      "d3_digest": "neutral direction valid for level-agnostic admissions"
+    },
+    "expected_execution": [
+      {"action": "d1 grant (epoch 301)", "allowed": true, "note": "promote confirms"},
+      {"action": "d2 revoke (epoch 302)", "allowed": true, "note": "demote blocks/revokes"},
+      {"action": "d2 replay as d1 (epoch 303)", "allowed": false, "blocked_by": "direction-mixing (idempotency key must not let demote replay as promote)"}
+    ],
+    "expected_retrieval": {
+      "after_demote": {"query": "grant read-staging", "default_recall": [], "note": "demote superseded promote — no active grant"}
+    },
+    "negative_control": {
+      "action": "replay demote (d2) as promote (d1) after revocation",
+      "allowed": false,
+      "note": "same failure class as FIX-007 tombstone-resurrection: revoking then resurrecting authority. Munin entry: idempotency-key direction-mixing; our entry: recovery/replay must not resurrect"
+    }
+  },
+  "semantics_note": "FIX-008 tests direction-in-identity: (1) direction is part of identity (opposite direction = different atom), (2) idempotency keys never mix directions, (3) supersession lineage (demote supersedes promote, re-promote supersedes demote), (4) direction-mixing replay is the same failure class as FIX-007 tombstone-resurrection (independent convergence: Munin from idempotency, us from recovery)."
+}
