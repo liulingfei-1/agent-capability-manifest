@@ -32,7 +32,25 @@
         "evidence_anchor": {
           "anchor_type": "oracle_path",
           "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t7",
-          "fixture_digest": "25c4375cb0200299f5f4517eb6020fdb8a06e48272c43937c4ebed840b6793cd",
+          "fixture_digest": "d73d973e0330e5468609b412c5a539f800a014cea1f29438304da23e6ad8be63",
+          "canonicalizer_version": "1.0",
+          "verdict_evidence_refs": [
+            "hits"
+          ]
+        }
+      },
+      {
+        "id": "a2",
+        "consumes": [
+          "oracle.expected_retrieval_set.default_recall_at_t7"
+        ],
+        "target": "recall(t=7,...)",
+        "op": "eq",
+        "expected_from": "oracle",
+        "evidence_anchor": {
+          "anchor_type": "oracle_path",
+          "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t7",
+          "fixture_digest": "d73d973e0330e5468609b412c5a539f800a014cea1f29438304da23e6ad8be63",
           "canonicalizer_version": "1.0",
           "verdict_evidence_refs": [
             "hits"
@@ -42,5 +60,5 @@
     ]
   },
   "failure_class": "evidence_anchor_mismatch",
-  "canonical_digest": "25c4375cb0200299f5f4517eb6020fdb8a06e48272c43937c4ebed840b6793cd"
+  "canonical_digest": "d73d973e0330e5468609b412c5a539f800a014cea1f29438304da23e6ad8be63"
 }
