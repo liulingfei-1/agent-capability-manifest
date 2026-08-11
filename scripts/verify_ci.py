@@ -52,7 +52,7 @@ run_runner(
     "CAP-3D-001",
     "runners/cap3d_runner.py",
     "fixtures/CAP-3D-001_three_digest_domains.json",
-    "005abf8446d8",
+    "59d9a8ec698d",
 )
 
 f5 = json.load(open(os.path.join(BASE, "fixtures/FIX-005_aging_and_digest.json")))
