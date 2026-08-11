@@ -53,8 +53,22 @@ def run_scenario(name, events, exp, atoms_init):
     for a in atoms_init:
         atoms[a['atom_id']] = Atom(a['atom_id'], a.get('content', ''), a.get('kind', 'ephemeral'),
                                    a.get('reference_count', 0), a.get('bucket', '1h'))
-    ordered = sorted(events, key=lambda e: int(e['tick'].rstrip('ms').lstrip('+') or 0))
-    for ev in ordered:
+    # tick semantics: DELTA relative to previous event — keep FILE ORDER, accumulate elapsed
+    # (暖暖 review 2026-08-11: sorted-by-tick-key was a bug — +2m treated as absolute 2 < 59)
+    elapsed_ms = 0
+    observed_order = []
+    for ev in events:
+        tstr = ev.get('tick', '+0s')
+        if tstr.endswith('ms'):
+            dt = int(tstr.rstrip('ms').lstrip('+'))
+        elif tstr.endswith('m'):
+            dt = int(tstr.rstrip('m').lstrip('+')) * 60000
+        elif tstr.endswith('s'):
+            dt = int(tstr.rstrip('s').lstrip('+')) * 1000
+        else:
+            dt = 0
+        elapsed_ms += dt
+        observed_order.append(f"{ev['type']}@{elapsed_ms}ms")
         t = ev['type']
         if t == 'admit':
             continue  # atoms pre-seeded from manifest
@@ -88,9 +102,10 @@ def run_scenario(name, events, exp, atoms_init):
                 a.promote_events += 1
                 a.audit.append(f"promote@{ev['tick']} -> promoted")
 
+    obs_info = {"observed_event_order": observed_order, "final_elapsed_ms": elapsed_ms}
     a = atoms.get('A')
     if a is None:
-        return [{"pass": False, "evidence": f"{name}: atom A missing"}]
+        return ([{"pass": False, "evidence": f"{name}: atom A missing"}], obs_info)
 
     exp_status = exp.get('A_status', 'durable')
     status_ok = (a.kind == 'durable' and exp_status in ('durable', 'promoted_to_durable', 'promoted_after_aging'))
@@ -119,9 +134,9 @@ def run_scenario(name, events, exp, atoms_init):
         ("identity_digest", id_ok, f"id={a.id} digest={short(a.identity_digest())}"),
         ("promote_count", count_ok, f"promote_events={a.promote_events}"),
     ]
-    return [{"fixture_id": "FIX-006", "scenario": name, "check": cname, "pass": ok,
+    return ([{"fixture_id": "FIX-006", "scenario": name, "check": cname, "pass": ok,
              "evidence": note, "full_digest": norm_digest({"scenario": name, "check": cname, "pass": ok})}
-            for cname, ok, note in checks]
+            for cname, ok, note in checks], obs_info)
 
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else '/var/minis/workspace/regression-pack/FIX-006_promote_after_aging_boundary.json'
@@ -136,15 +151,18 @@ def main():
     atoms_init = fixture['manifest']['atoms']
     all_v = []
     # main scenario from manifest.events
-    all_v.extend(run_scenario("main", fixture['manifest'].get('events', []), fixture['manifest']['oracle']['expected'], atoms_init))
+    v_main, obs_main = run_scenario("main", fixture['manifest'].get('events', []), fixture['manifest']['oracle']['expected'], atoms_init)
+    all_v.extend(v_main)
+    obs_info = obs_main
     # negative controls
     for nc in fixture.get('negative_controls', []):
-        all_v.extend(run_scenario(nc['id'], nc['events'], nc['expected'], atoms_init))
+        v_nc, obs_nc = run_scenario(nc['id'], nc['events'], nc['expected'], atoms_init)
+        all_v.extend(v_nc)
     summary = {"pass": sum(1 for v in all_v if v["pass"]), "fail": sum(1 for v in all_v if not v["pass"]), "blocked": 0, "blockers": []}
     report = {
         "runner_identity": {"name": "minis", "version": "0.4", "runtime": "iSH Alpine aarch64",
                             "env_digest": norm_digest({"python": sys.version.split()[0]})},
-        "verdicts": all_v, "summary": summary,
+        "verdicts": all_v, "summary": summary, "trace": obs_info,
         "digest_report": {"input_digest": input_digest,  # self-excluded (matches declared canonical_digest)
                           "output_digest": norm_digest({"verdicts": all_v, "summary": summary}),
                           "normalization": "strict JCS RFC 8785 (canonicalizer_version=1.0)", "canonicalizer_version": "1.0"},
