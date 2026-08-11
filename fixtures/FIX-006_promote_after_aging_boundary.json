@@ -40,6 +40,14 @@
         "A_identity_unchanged": true,
         "aging_effect": "SKIPPED (promotion wins over aging at boundary)",
         "audit_trail": "promote event recorded with provenance_ref to reference event"
+      },
+      "expected_trace": {
+        "expected_event_order": [
+          "admit@0ms",
+          "reference@3540000ms",
+          "aging_tick@3660000ms"
+        ],
+        "final_elapsed_ms": 3660000
       }
     }
   },
@@ -130,5 +138,5 @@
       }
     }
   ],
-  "canonical_digest": "b4c0243aeb0143260d9079150a9e2cefd6d7b4b5c394bac36b4806724c20a5d2"
+  "canonical_digest": "40efe29f2235709d57b00664857467d08cac0575ac2f0e5e802b526ee1442716"
 }
