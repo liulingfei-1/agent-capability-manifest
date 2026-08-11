@@ -1,0 +1,90 @@
+{
+  "runner_identity": {
+    "name": "minis-cap3d",
+    "version": "0.1",
+    "runtime": "Linux-4.20.69-ish-aarch64-with",
+    "env_digest": "4ea8eecbcc15a59e1b0284b0788e1baa45943fb3b841dded68f2f7a6a3060e40"
+  },
+  "verdicts": [
+    {
+      "fixture_id": "CAP-3D-001_three_digest_domains",
+      "check": "description_identity_unchanged_by_grant_revoke",
+      "pass": true,
+      "expected": true,
+      "actual": true,
+      "evidence_digest": "75db2dbee11db20f42a17fc768c3d2f688d1202b59149352fffc9ac17787371e"
+    },
+    {
+      "fixture_id": "CAP-3D-001_three_digest_domains",
+      "check": "policy_digest_changes_v1_to_v2",
+      "pass": true,
+      "expected": true,
+      "actual": true,
+      "evidence_digest": "a656f7aff2aa7181dc310e58852f0aceba00ce1f72ae2aae4d62d1794a722e9b"
+    },
+    {
+      "fixture_id": "CAP-3D-001_three_digest_domains",
+      "check": "manifest_digest_changes_when_policy_changes",
+      "pass": true,
+      "expected": true,
+      "actual": true,
+      "evidence_digest": "e2ea6b69b6f7b3703d25f3f82adb9b92cd6eaa4d2afae9adfede2438192628ad"
+    },
+    {
+      "fixture_id": "CAP-3D-001_three_digest_domains",
+      "check": "manifest_digest_stable_under_capability_input_reorder",
+      "pass": true,
+      "expected": true,
+      "actual": true,
+      "evidence_digest": "1ba992d81347fde2484c197c0ab955f40a2c0f274b062286994bd14783b3da47"
+    },
+    {
+      "fixture_id": "CAP-3D-001_three_digest_domains",
+      "check": "old_grant_after_policy_bump",
+      "pass": true,
+      "expected": {
+        "evidence_state": "INDET",
+        "operational_disposition": "HOLD"
+      },
+      "actual": {
+        "evidence_state": "INDET",
+        "operational_disposition": "HOLD"
+      },
+      "evidence_digest": "12562900f4eb641d5ae1cfe9c08ca2d3b42812a9e19101c08ac7d808d6e4f634"
+    },
+    {
+      "fixture_id": "CAP-3D-001_three_digest_domains",
+      "check": "polluted_description_with_execution_authority",
+      "pass": true,
+      "expected": "REJECT",
+      "actual": "REJECT",
+      "evidence_digest": "17c574ac102b4697c27338b9691813384a4a2df0667d93840d3eb99fb5322619"
+    },
+    {
+      "fixture_id": "CAP-3D-001_three_digest_domains",
+      "check": "three_immutable_domains_exclude_authorization_state",
+      "pass": true,
+      "expected": true,
+      "actual": true,
+      "evidence_digest": "6759aae3e294f52159341d274a3302387c1d7e5faf8c148e2e652a8fc4222341"
+    }
+  ],
+  "summary": {
+    "pass": 7,
+    "fail": 0,
+    "blocked": 0,
+    "blockers": []
+  },
+  "computed": {
+    "cap_b_identity": "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6",
+    "policy_v1_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
+    "policy_v2_digest": "0a4737f83058769120a5ef3f1b089319ababf893e4366750be45a8aa85bc036b",
+    "manifest_v1_digest": "1505b6f8fd2be1ac2e5de2eb803ff08a909b665e6e6b48920dacca216530778f",
+    "manifest_v2_digest": "7810242d65621122c6ecbb43062a1d0d230a81f18c9d15b610fc198c937bfc77"
+  },
+  "digest_report": {
+    "input_digest": "005abf8446d8d2a9b8d3cfd9a1a3cdecd95dd14ee260f4cd7cf13325ec52464d",
+    "output_digest": "b306b74439de9ab4cb135bbd2c59a214725a419b4736021d653914b15d3b26f3",
+    "normalization": "JCS-compatible string/list/object profile + recursive NFC"
+  }
+}
