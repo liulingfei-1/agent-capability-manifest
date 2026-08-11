@@ -1,0 +1,73 @@
+{
+ "fixture_id": "CL-ADV-002_query_forgery",
+ "version": "0.1-draft",
+ "family": "safety (claims_lookup adversarial)",
+ "depends_on": [
+  "MEMORY_SCHEMA_v0.6"
+ ],
+ "co_defined_with": "Stone (forgery adversarial), Minis (fixture shape)",
+ "date": "2026-08-11",
+ "manifest": {
+  "goal": "lookup 端点必须验证被查作者 set-root 签名；伪造/省略签名返回「查不到」必须 UNVERIFIED+fence",
+  "identity_rule": "set-root 签名验证在查询时刻执行；无有效签名 → UNVERIFIED（证据状态，非语义主张）",
+  "atoms": [
+   {
+    "atom_id": "A-setroot",
+    "content": "author A manifest set root",
+    "kind": "signed-root",
+    "signer": "A-pubkey"
+   },
+   {
+    "atom_id": "forged",
+    "content": "forged query response",
+    "kind": "unsigned"
+   }
+  ],
+  "journal": [],
+  "authority_epoch": 300
+ },
+ "events": [
+  {
+   "type": "query",
+   "payload": {
+    "target": "A",
+    "query": "capability: 1M tps",
+    "auth": "valid-A-signature"
+   },
+   "expect": "verifiable lookup"
+  },
+  {
+   "type": "query",
+   "payload": {
+    "target": "A",
+    "query": "capability: 1M tps",
+    "auth": "forged-no-signature",
+    "tick_offset": 301
+   },
+   "expect": "UNVERIFIED + fence — no semantic ALLOWED/DENIED"
+  }
+ ],
+ "oracle": {
+  "expected_execution": [
+   {
+    "action": "query with valid A signature",
+    "allowed": true
+   },
+   {
+    "action": "query with forged/no signature",
+    "allowed": false,
+    "result": "UNVERIFIED",
+    "note": "evidence-state, not semantic claim"
+   }
+  ],
+  "expected_retrieval": {
+   "forged query": "UNVERIFIED"
+  }
+ },
+ "negative_control": {
+  "action": "attackers return fake not-found via omitted signature",
+  "allowed": false,
+  "blocked_by": "set-root signature validation at query time"
+ },
+ "semantics_note": "Stone ②: lookup 端点验证被查作者 set-root 签名，否则攻击者返回假的查不到。与 MEMORY SCHEMA v0.6 执行权威重验同构（动作时刻评估）。"
+}
