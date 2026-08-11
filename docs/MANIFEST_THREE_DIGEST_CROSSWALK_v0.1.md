@@ -35,8 +35,7 @@ H(len(kind)||kind||len(scope)||scope||len(statement)||statement)
 | 字段 | capability_id/name/description/effect_scope | kind/scope/statement | 可建立字段映射，但不是字节等价 |
 | 编码 | JCS 对象 | length-prefixed 字段串 | **实现分歧**：不可直接比较 digest |
 | serializer 迁移 | identity 依赖 JCS profile | identity 与 JSON/CBOR 传输无关 | Minis 更强的 transport-independence；peer 更易复用通用 JCS 工具 |
-| capability_id | 进入 digest | atom_id 通常由内容构造/映射 | 待冻结：若 capability_id 是任意发行方 ID，同语义不同 ID 会产生不同 identity |
-| description/name | 显式入 digest | 合并进 statement/kind | Peer 字段粒度更细；Minis 需标准投影后才能互换 |
+Peer 已确认：`capability_id` 是确定性内容导出（`sha256(JCS({capability_id,name,description,effect_scope}))`），可跨发布者 dedup；`capabilities` 是**有序序列**，写时定序，顺序进入 digest。| description/name | 显式入 digest | 合并进 statement/kind | Peer 字段粒度更细；Minis 需标准投影后才能互换 |
 
 **共享核心建议**：规范共同语义字段为 `{kind, scope, statement}`，允许两种 identity profile：
 
@@ -68,7 +67,7 @@ Minis v0.1 当前状态：有 manifest_version/agent/domains/tools/skills/protoc
 | policy 绑定 | policy_digest 进入 manifest_digest | policy_version/authority 有语义但无不可变 policy object digest | 应新增 policy_digest |
 | capabilities | identity 列表 | tools/skills 对象数组 | 应先投影为 identity 列表再算分发 digest |
 | license/terms | 唯一合法住所并入 digest | v0.1 schema 缺失 | 真缺口，应新增 |
-| 数组顺序 | JCS 对数组顺序敏感 | 未冻结 | **待决**：若 capability 集合无序，hash 前必须按 64hex identity 排序；否则排序差异造成伪 drift |
+| 数组顺序 | JCS 对数组顺序敏感 | 未冻结 | **已裁决**：peer `capabilities` 是有序序列，写时定序；顺序变化必须改变 manifest digest，不得静默排序 |
 
 **共享核心建议**：
 
@@ -77,14 +76,14 @@ Minis v0.1 当前状态：有 manifest_version/agent/domains/tools/skills/protoc
   "manifest_id": "...",
   "version": "0.2",
   "policy_digest": "<64hex>",
-  "capability_identities": ["<64hex sorted ascending>"],
+  "capability_identities": ["<64hex in declared order>"],
   "licenses": [...],
   "distribution_terms": [...]
 }
 ```
 
-- 若 `capability_identities` 语义是集合，规范必须要求按 lowercase 64hex 升序后再做 JCS。
-- 若顺序承载优先级，则必须声明 `ordering_semantics`，不得静默排序。
+- 若 `capabilities` 是有序序列，必须保留写时顺序，顺序变化必须产生 manifest digest divergence；不得静默排序。
+- 若未来引入无序集合 profile，必须使用不同的 `ordering_semantics`/profile，不得与当前 profile 混用。
 
 ### 2.3 Policy domain
 
@@ -166,8 +165,8 @@ Minis v0.1 的 `tools[]` 当前内嵌：
 | ID | 分歧 | 类型 | 影响 | 建议 |
 |---|---|---|---|---|
 | D1 | JCS identity vs length-prefixed identity | profile divergence | 相同语义 digest 不同 | 必带 identity_profile；不跨 profile 比 digest |
-| D2 | capability_id 是否为内容决定值 | identity ambiguity | 任意 ID 破坏跨发布方去重 | 定义 deterministic capability_id 或从 identity 输入移除 |
-| D3 | capability identity 数组排序未冻结 | canonicalization ambiguity | 同集合不同顺序 → manifest drift | 明确集合排序或 ordering_semantics |
+| D2 | capability_id 决定性 | **已裁决** | peer capability_id 是内容确定性导出，可跨发布者 dedup；Minis 仍 profile-pinned | 固定 peer 规则，不把 JCS identity 与 length-prefixed identity 混作 byte equality |
+| D3 | capability identity 数组排序 | **已裁决** | peer 是有序序列，顺序进入 manifest digest | 保留写时顺序；乱序必须产生 digest divergence |
 | D4 | v0.1 缺 policy_digest | schema gap | policy_version 无法证明策略字节 | 引入 immutable policy object |
 | D5 | v0.1 缺 license/distribution_terms 的唯一住所 | governance gap | 授权/分发条款不可证明 | 纳入 distribution digest |
 | D6 | 状态字段内嵌 immutable manifest | invariant violation | GRANT/REVOKE 改 manifest identity | 状态迁移到 append-only receipt 层 |
@@ -191,8 +190,8 @@ SC-7 every digest comparison is profile-pinned; cross-profile semantic mapping i
 
 - 同 description + 不同 authorization receipts → capability_identity / manifest_digest / policy_digest 均不变。
 - policy document v1→v2 → capability_identity 不变，policy_digest 与 manifest_digest 改变，旧 GRANT 在新 epoch 进入 INDET/HOLD。
-- capability identities 输入顺序打乱 → 若声明集合语义，manifest_digest 必须不变；若声明顺序语义，必须显式不同。
-- negative control：把 `execution_authority` 塞回 description 或 distribution digest → REJECT（状态污染不可变域）。
+- capability identities 输入顺序打乱 → peer 已裁决为有序序列，manifest_digest 必须改变；若未来声明集合语义，必须另立 profile，不得复用此 oracle。
+- capability_id 的自引用文字需要非循环构造式澄清，再进入 shared core。
 
 ---
 *Minis divergence analysis v0.1 · peer fields pinned at commit 30035aa · 2026-08-11*
