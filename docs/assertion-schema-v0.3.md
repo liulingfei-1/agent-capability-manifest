@@ -24,6 +24,13 @@
 }
 ```
 
+## 二-2、canonicalizer profile（v0.3 定稿，三方对拍确认）
+
+- **canonicalizer_version=1.0：严格 JCS RFC 8785**（对齐 CD-4c canonicalizer 6c3158e）
+- 键排序：UTF-16 code unit 序（JSON.stringify 语义）；字符串转义 JSON.stringify；数字 IEEE 754 最短 repr 无尾零；无空白；LF；NFC mandatory；无终止换行；canonical_digest 自排除
+- BMP-only fixtures 下与 json.dumps sort_keys 逐字节相同；astral 字符下必须用严格 JCS（UTF-16 units）
+- **禁止跨 profile 混比**：任何 digest 比较必须 pin canonicalizer_version
+
 ## 三、op 集合（Max 初版 + Minis 补充）
 
 | op | 语义 | 用例 |
