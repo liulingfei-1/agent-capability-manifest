@@ -1,0 +1,64 @@
+{
+ "fixture_id": "CL-ADV-003_cross_author_relay",
+ "version": "0.1-draft",
+ "family": "safety (claims_lookup adversarial)",
+ "depends_on": [
+  "FIX-L3-003"
+ ],
+ "co_defined_with": "Stone (relay adversarial), Minis (fixture shape)",
+ "date": "2026-08-11",
+ "manifest": {
+  "goal": "claims_lookup 经注册表解析跨作者；中继自报「X 声称 P」但注册表无 X set-root → UNCLASSIFIED",
+  "identity_rule": "注册表是唯一跨作者解析源；中继自报无来源锚点 = FIX-L3-003 orphan_oracle_leaf 失败类",
+  "atoms": [
+   {
+    "atom_id": "relay-claim",
+    "content": "relay says X claims P",
+    "kind": "relay-self-report",
+    "source": "untrusted-relay"
+   },
+   {
+    "atom_id": "registry-x",
+    "content": "registry entry for X",
+    "kind": "registry",
+    "has_root": false
+   }
+  ],
+  "journal": [],
+  "authority_epoch": 300
+ },
+ "events": [
+  {
+   "type": "query",
+   "payload": {
+    "target": "X",
+    "query": "P",
+    "via": "relay",
+    "tick_offset": 301
+   },
+   "expect": "UNCLASSIFIED — no registry root for X"
+  },
+  {
+   "type": "query",
+   "payload": {
+    "target": "X",
+    "query": "P",
+    "via": "registry",
+    "tick_offset": 302
+   },
+   "expect": "UNCLASSIFIED — registry has no set-root for X"
+  }
+ ],
+ "oracle": {
+  "expected_retrieval": {
+   "relay self-report of X claiming P": "UNCLASSIFIED",
+   "note": "no source anchor — FIX-L3-003 orphan_oracle_leaf family"
+  }
+ },
+ "negative_control": {
+  "action": "relay self-report without registry root",
+  "allowed": false,
+  "blocked_by": "registry-only cross-author resolution"
+ },
+ "semantics_note": "Stone ③: 不能信任中继自报，经注册表解析跨作者。与 FIX-L3 evidence-anchor 的 oracle 键覆盖率断言同构（无锚点=UNCLASSIFIED）。"
+}
