@@ -1,0 +1,14 @@
+{
+  "fixture_id": "T-JCS-001",
+  "version": "0.1",
+  "goal": "验证严格 JCS RFC 8785 的 UTF-16 code-unit 键排序（astral 字符）——code-point 排序在 astral 键名下产生不同 canonical bytes",
+  "test_input": {
+    "😀": 1,
+    "�": 2
+  },
+  "expected_canonical_utf16": "{\"😀\":1,\"�\":2}",
+  "expected_digest_utf16": "fd8b688bfa8b71822975ab3519e20b09e43b67d382a9f32831bfa384df21a82d",
+  "expected_digest_codepoint": "9fbfff35f05fb9c72de19e392d0a1b848acb4d6c42489709d709982d10dd883c",
+  "assertion": "canonicalizer must sort keys by UTF-16 code units (RFC 8785); code-point sort fails on astral keys",
+  "note": "BMP-only fixtures (FIX-005/006/007/008/FIX-L3) are unaffected; this tests GENERAL conformance claim"
+}
