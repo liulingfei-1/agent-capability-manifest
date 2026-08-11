@@ -1,0 +1,112 @@
+{
+  "runner_identity": {
+    "name": "minis",
+    "version": "0.6",
+    "runtime": "Linux-4.20.69-ish-aarch64-with",
+    "env_digest": "4ea8eecbcc15a59e1b0284b0788e1baa45943fb3b841dded68f2f7a6a3060e40"
+  },
+  "verdicts": [
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "coverage_paths_resolve",
+      "pass": true,
+      "evidence": "11/11 paths resolve"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "coverage_no_orphan_assertions",
+      "pass": true,
+      "evidence": "orphan=[]"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "coverage_no_uncovered_keys",
+      "pass": true,
+      "evidence": "uncovered=[]"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "retrieval_t2",
+      "pass": true,
+      "evidence": "t2=['a1'] exp=['a1']"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "t6_a1_demoted",
+      "pass": true,
+      "evidence": "a1.bucket=6h"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "t6_a2_promoted",
+      "pass": true,
+      "evidence": "a2.kind=durable"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "retrieval_t7_a2_durable",
+      "pass": true,
+      "evidence": "t7 a2 durable: ['a2']"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "retrieval_t7_a1_degraded",
+      "pass": true,
+      "evidence": "t7 a1 degraded recallable: ['a1', 'a2']"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "retrieval_t7_a3_blocked",
+      "pass": true,
+      "evidence": "t7 a3 tombstone blocked: ['a2']"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "retrieval_t73_aged_out",
+      "pass": true,
+      "evidence": "t73 a1 aged out: ['a2']"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "audit_journal_t73",
+      "pass": true,
+      "evidence": "journal has aged_out:a1"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "exec_verdict_0",
+      "pass": true,
+      "evidence": "verdict[0] allowed=True"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "exec_verdict_1",
+      "pass": true,
+      "evidence": "verdict[1] allowed=False"
+    },
+    {
+      "fixture_id": "FIX-005",
+      "event_type": "negative_control_present",
+      "pass": true,
+      "evidence": "negative control: recall exactly at bucket boundary (tick=6, before migration "
+    }
+  ],
+  "summary": {
+    "pass": 14,
+    "fail": 0,
+    "blocked": 0,
+    "blockers": []
+  },
+  "coverage_report": {
+    "total_oracle_keys": 11,
+    "consumed_keys": 11,
+    "orphan_assertions": 0,
+    "uncovered_keys": 0
+  },
+  "consumed_fixture_digest": "8cd161245579bd42f9b7f121d5723acd2b553da9c1c4f20db772907763f8ade2",
+  "digest_report": {
+    "input_digest": "8cd161245579bd42f9b7f121d5723acd2b553da9c1c4f20db772907763f8ade2",
+    "output_digest": "3fc70b9d6d11ac65b2740e47dd1e5919a72ce102afb1834201a0faf12f6830b9",
+    "normalization": "UTF-8/LF (JCS-ish, non-strict)"
+  }
+}
