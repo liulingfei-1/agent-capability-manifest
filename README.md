@@ -25,7 +25,7 @@ AI agent 世界缺三样东西，本仓库给三件套：
 
 ### 2. Cross-Runtime Regression Suite v2 — 记忆系统的"驾考"
 
-一套标准考试卷（fixture），考 agent 的记忆系统。任何环境（iPhone/Windows/Linux/云端）都能跑。**11 个 fixture、5 组主题**：
+一套标准考试卷（fixture），考 agent 的记忆系统。任何环境（iPhone/Windows/Linux/云端）都能跑。**16 个 fixture、6 组主题**：
 
 | 组 | 考什么 | 状态 |
 |---|---|---|
@@ -34,6 +34,7 @@ AI agent 世界缺三样东西，本仓库给三件套：
 | FIX-007 | bounded-recovery 故障恢复（fail-closed/有界/不复活 tombstone）| ✅ 17/17 |
 | FIX-008 | direction-mixing（demote 重放为 promote 必须 BLOCKED）| ✅ 8/8（v0.2 direction 进 identity）|
 | FIX-L3 001-006 | evidence-anchor 断言验证（failure_class 体系）| ✅ 双实现对拍闭环 |
+| CL-ADV 001-005 | claims_lookup 对抗（deny 重放/查询伪造/跨作者/状态链/set-root 过期）| ✅ 5/5（Stone 线，v0.2 提案）|
 
 **验证战绩（3 独立运行时全绿）**：
 
@@ -44,6 +45,8 @@ AI agent 世界缺三样东西，本仓库给三件套：
 | Max（Windows Python 3.12） | 12/12 ✅ | 12/12 ✅ |
 
 **对拍基准**：docs/VERIFIED_FIXTURES.md（完整 64 位 digest + 生成工具 + 配对键 `runner:fixture` + 版本 tag `fixture-v0.2.0-digests`）——任何 runtime 跑完对 digest 即知是否同一标准。
+
+**跨运行时可比矩阵**：docs/cross-runtime-matrix-v2.md（完整 64 位 hash + 公共断言投影 P1-P5/Q1-Q6 + 独立复算步骤）——Codex 核验阻塞已解除，Minis 侧材料完整可复算。
 
 ### 3. Digest 验证纪律 — 防作弊的"答题卡指纹"
 
@@ -65,7 +68,7 @@ AI agent 世界缺三样东西，本仓库给三件套：
 
 ```
 docs/       Manifest v0.1 · Regression v2 Contract · Memory Schema v0.6 · 基准锚 · 映射文档 · 测试向量
-fixtures/   CAP-001, FIX-001~008, FIX-L3-001~006（含 canonical digest）
+fixtures/   CAP-001, FIX-001~008, FIX-L3-001~006, CL-ADV-001~005（含 canonical digest）
 runners/    fix005/006/007/008 + fixl3（零依赖，Python 3.8+）
 verdicts/   多方验证结果 + digest 对账记录
 ```
@@ -80,6 +83,8 @@ python3 runners/fix006_runner.py fixtures/FIX-006_promote_after_aging_boundary.j
 python3 runners/fix007_runner.py fixtures/FIX-007_bounded_recovery.json
 python3 runners/fix008_runner.py fixtures/FIX-008_direction_mixing.json
 python3 runners/fixl3_runner.py fixtures/FIX-L3-001.json
+# 跑 CL-ADV 对抗 fixture
+python3 runners/cl_adv_runner.py fixtures/CL-ADV-001_deny_tombstone_replay.json
 ```
 
 输出：`runner_identity + verdicts + summary + coverage_report + digest_report`（完整 64 位 digest，canonicalizer_version 标注）。
