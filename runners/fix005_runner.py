@@ -214,12 +214,12 @@ def main():
 
     summary = {"pass": sum(1 for v in verdicts if v["pass"]), "fail": sum(1 for v in verdicts if not v["pass"]), "blocked": 0, "blockers": []}
     report = {
-        "runner_identity": {"name": "minis", "version": "0.5", "runtime": platform.platform(),
-                            "env_digest": norm_digest({"python": sys.version.split()[0], "platform": platform.platform()})[:12]},
+        "runner_identity": {"name": "minis", "version": "0.6", "runtime": platform.platform(),
+                            "env_digest": norm_digest({"python": sys.version.split()[0], "platform": platform.platform()})},
         "verdicts": verdicts, "summary": summary,
         "coverage_report": coverage,
         "consumed_fixture_digest": declared,
-        "digest_report": {"input_digest": actual_digest[:12], "output_digest": norm_digest({"verdicts": verdicts, "summary": summary})[:12],
+        "digest_report": {"input_digest": actual_digest, "output_digest": norm_digest({"verdicts": verdicts, "summary": summary}),
                           "normalization": "UTF-8/LF (JCS-ish, non-strict)"},
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
