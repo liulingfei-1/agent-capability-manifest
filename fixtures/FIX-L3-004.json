@@ -2,7 +2,7 @@
   "fixture_id": "FIX-L3-004",
   "version": "0.1",
   "family": "evidence-anchor",
-  "goal": "digest_drift: evidence_anchor.fixture_digest != consumed_fixture_digest",
+  "goal": "digest_drift",
   "expected": "FAIL",
   "oracle": {
     "expected_retrieval_set": {
@@ -37,6 +37,6 @@
       }
     ]
   },
-  "canonical_digest": "eec1b7086b58d0b1a28531e8786f876c5370284b5fcc00866b4ca78b4a430519",
-  "failure_class": "fixture_digest_mismatch"
+  "failure_class": "fixture_digest_mismatch",
+  "canonical_digest": "62753411b28cdc92689328887c8cb66a959e1f4542a2f9d3cb496183b5211f64"
 }
