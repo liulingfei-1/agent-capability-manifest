@@ -1,0 +1,53 @@
+{
+  "contribution_schema": "cd4c-third-party-fixture/v0.1",
+  "contributor": "Minis",
+  "repository": "https://github.com/liulingfei-1/agent-capability-manifest",
+  "license": "MIT",
+  "fixture_source_commit": "f3eadfbfceb1eb681cea6052d7be17e27af1abe2",
+  "receipt_crosswalk_commit": "d6c39de2ca4b4d0be4a5565752ddf45759200098",
+  "canonicalization": {
+    "profile": "strict JCS RFC 8785",
+    "recursive_nfc": true,
+    "encoding": "UTF-8",
+    "newline": "none",
+    "digest": "SHA-256 lowercase hex"
+  },
+  "fixtures": [
+    {
+      "fixture_id": "FIX-005",
+      "path": "fixtures/FIX-005_aging_and_digest.json",
+      "raw_sha256": "df1f65548cbda037bc485478315fa8e197542e23332395a8060615631093a408",
+      "canonical_digest": "8cd161245579bd42f9b7f121d5723acd2b553da9c1c4f20db772907763f8ade2",
+      "runner": "runners/fix005_runner.py",
+      "runner_raw_sha256": "8cb47174f5bcc44ecd9c847839b66fe06a24f70d5c37d3502b081255b46462d7",
+      "report": "verdicts/fix005_v06_minis_report.json",
+      "verdict_summary": "14/14 PASS",
+      "output_digest": "3fc70b9d6d11ac65b2740e47dd1e5919a72ce102afb1834201a0faf12f6830b9",
+      "env_digest": "4ea8eecbcc15a59e1b0284b0788e1baa45943fb3b841dded68f2f7a6a3060e40"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "path": "fixtures/FIX-006_promote_after_aging_boundary.json",
+      "raw_sha256": "9c99057e397e46b6ae381b6faad4710a838bc49d96ba571928602732db3994c2",
+      "canonical_digest": "40efe29f2235709d57b00664857467d08cac0575ac2f0e5e802b526ee1442716",
+      "runner": "runners/fix006_runner.py",
+      "runner_raw_sha256": "0a89d72d81d6f5d42a14046b83ffbcf7ab6c26bf730572147a5949fc2a6afb3a",
+      "report": "verdicts/fix006_v06_minis_report.json",
+      "verdict_summary": "12/12 PASS",
+      "output_digest": "67ed23721a47ebb297c51c6aea663a2a4a82b474d6660f22bdf361262a13824c",
+      "env_digest": "4ea8eecbcc15a59e1b0284b0788e1baa45943fb3b841dded68f2f7a6a3060e40",
+      "expected_trace": {
+        "event_order": ["admit@0ms", "reference@3540000ms", "aging_tick@3660000ms"],
+        "final_elapsed_ms": 3660000
+      }
+    }
+  ],
+  "receipt_crosswalk": "docs/RECEIPT_SCHEMA_CROSSWALK_v0.1.md",
+  "matrix": "docs/cross-runtime-matrix-v2.md",
+  "security_boundary": {
+    "fixture_is_data_only": true,
+    "network_calls_required": false,
+    "credentials_required": false,
+    "fixture_mutation": false
+  }
+}
