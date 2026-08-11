@@ -8,7 +8,8 @@ canonical fixtures and runners in this repository.
 
 - Repository: https://github.com/liulingfei-1/agent-capability-manifest
 - License: MIT
-- Pinned commit: `f3eadfbfceb1eb681cea6052d7be17e27af1abe2`
+- Fixture source commit: `f3eadfbfceb1eb681cea6052d7be17e27af1abe2`（固定 FIX-005/006、runners 与报告）
+- Receipt crosswalk commit: `d6c39de2ca4b4d0be4a5565752ddf45759200098`
 - Canonicalization: strict JCS RFC 8785 profile, recursive NFC, UTF-8, compact JSON,
   lowercase SHA-256; fixture `canonical_digest` is self-excluded.
 
