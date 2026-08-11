@@ -11,21 +11,26 @@
 
 ## Fixture 基准表
 
-| 配对键 | Fixture | 版本 | Runner（实现方）| canonical digest | evidence verdict | operational disposition |
+| 配对键 | Fixture | 版本 | Runner（实现方）| canonical digest（完整 64 位）| evidence verdict | operational disposition |
 |---|---|---|---|---|---|---|
-| minis:FIX-005 | FIX-005 | v0.4 | fix005_runner.py v0.5 (minis) | 8cd161245579bd42 | PASS | ACTIVE |
+| minis:FIX-005 | FIX-005 | v0.4 | fix005_runner.py v0.5 (minis) | 8cd161245579bd42f9b7f121d5723acd2b553da9c1c4f20db772907763f8ade2 | PASS | ACTIVE |
 | minis:FIX-006 | FIX-006 | v0.2-locked | fix006_runner.py v0.4 (minis) | b4c0243aeb01 | PASS | ACTIVE |
-| minis:FIX-007 | FIX-007 | v0.2 | fix007_runner.py v0.3 (minis) | 4126aa999c7026b4 | PASS | ACTIVE |
-| minis:FIX-L3-001 | FIX-L3-001 | v0.1 | fixl3_runner.py v0.1 (minis) | f529f9a9433f508d | PASS | ACTIVE |
-| minis:FIX-L3-002 | FIX-L3-002 | v0.1 | fixl3_runner.py v0.1 (minis) | d73d973e0330e546 | FAIL (evidence_anchor_mismatch) | REJECT |
-| minis:FIX-L3-003 | FIX-L3-003 | v0.1 | fixl3_runner.py v0.1 (minis) | 9bca36390437d045 | FAIL (oracle_coverage_gap) | REJECT |
-| minis:FIX-L3-004 | FIX-L3-004 | v0.1 | fixl3_runner.py v0.1 (minis) | 62753411b28cdc92 | FAIL (fixture_digest_mismatch) | REJECT |
-| minis:FIX-L3-005 | FIX-L3-005 | v0.1 | fixl3_runner.py v0.1 (minis) | bb7e2e2a11869ff2 | UNVERIFIED | HOLD/fence |
-| minis:FIX-L3-006 | FIX-L3-006 | v0.1 | fixl3_runner.py v0.1 (minis) | 2e388305d3a57ce8 | MIGRATED_PASS | ACTIVE |
+| minis:FIX-007 | FIX-007 | v0.2 | fix007_runner.py v0.3 (minis) | 4126aa999c7026b4d42ab2e79d2075c3bf1d937e362a027a7e189672c0aa64cf | PASS | ACTIVE |
+| minis:FIX-L3-001 | FIX-L3-001 | v0.1 | fixl3_runner.py v0.1 (minis) | f529f9a9433f508d43a9184a80a19a1d3730fe704567bb14af20e831acbd0745 | PASS | ACTIVE |
+| minis:FIX-L3-002 | FIX-L3-002 | v0.1 | fixl3_runner.py v0.1 (minis) | d73d973e0330e5468609b412c5a539f800a014cea1f29438304da23e6ad8be63 | FAIL (evidence_anchor_mismatch) | REJECT |
+| minis:FIX-L3-003 | FIX-L3-003 | v0.1 | fixl3_runner.py v0.1 (minis) | 9bca36390437d0452beb51011312dfcd754ee706e84943c5af53368c728dbac4 | FAIL (oracle_coverage_gap) | REJECT |
+| minis:FIX-L3-004 | FIX-L3-004 | v0.1 | fixl3_runner.py v0.1 (minis) | 62753411b28cdc92689328887c8cb66a959e1f4542a2f9d3cb496183b5211f64 | FAIL (fixture_digest_mismatch) | REJECT |
+| minis:FIX-L3-005 | FIX-L3-005 | v0.1 | fixl3_runner.py v0.1 (minis) | bb7e2e2a11869ff23c5cb91b96d8e9c71620672407b98409fc53800cfaa19c0e | UNVERIFIED | HOLD/fence |
+| minis:FIX-L3-006 | FIX-L3-006 | v0.1 | fixl3_runner.py v0.1 (minis) | 2e388305d3a57ce8e8cd2702fc2f82214b19fdc0c51ecd4bbc4e7f3a15d630e9 | MIGRATED_PASS | ACTIVE |
 | huaahua:FIX-005 | FIX-005 | v0.3 | verify.py (huaahua-cd4c) | d73e84c3ceb67851 | PASS | ACTIVE |
 | huaahua:FIX-006 | FIX-006 | v0.2-locked | verify.py (huaahua-cd4c) | b4c0243aeb01 | PASS | ACTIVE |
 | max:FIX-005 | FIX-005 | v0.3 | fix005_runner.py v0.3 (max-win) | e95e2cdb00b7 | PASS | ACTIVE |
 | max:FIX-006 | FIX-006 | v0.4 | fix006_runner.py v0.4 (max-win) | b4c0243aeb01 | PASS | ACTIVE |
+
+## 生成工具
+
+- Python 3.12.13 + hashlib（sha256）+ 严格 JCS RFC 8785 序列化器（canonicalizer_version=1.0）
+- 展示可缩短为 16 位前缀，对拍/核验必须用完整 64 位（防截断或 canonicalizer 漂移误判）
 
 ## 说明
 
