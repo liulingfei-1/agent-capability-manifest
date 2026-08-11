@@ -35,7 +35,8 @@ H(len(kind)||kind||len(scope)||scope||len(statement)||statement)
 | 字段 | capability_id/name/description/effect_scope | kind/scope/statement | 可建立字段映射，但不是字节等价 |
 | 编码 | JCS 对象 | length-prefixed 字段串 | **实现分歧**：不可直接比较 digest |
 | serializer 迁移 | identity 依赖 JCS profile | identity 与 JSON/CBOR 传输无关 | Minis 更强的 transport-independence；peer 更易复用通用 JCS 工具 |
-Peer 已确认：`capability_id` 是确定性内容导出（`sha256(JCS({capability_id,name,description,effect_scope}))`），可跨发布者 dedup；`capabilities` 是**有序序列**，写时定序，顺序进入 digest。| description/name | 显式入 digest | 合并进 statement/kind | Peer 字段粒度更细；Minis 需标准投影后才能互换 |
+| capability_id | 进入 digest | atom_id 通常由内容构造/映射 | **已裁决**：peer capability_id 从 name/description/effect_scope 语义字段确定性导出，可跨发布者 dedup；不把自由 ID 当作 shared core |
+| description/name | 显式入 digest | 合并进 statement/kind | Peer 字段粒度更细；Minis 需标准投影后才能互换 |
 
 **共享核心建议**：规范共同语义字段为 `{kind, scope, statement}`，允许两种 identity profile：
 
@@ -65,7 +66,7 @@ Minis v0.1 当前状态：有 manifest_version/agent/domains/tools/skills/protoc
 |---|---|---|---|
 | 分发对象完整性 | manifest_digest 独立认证 | fixture canonical_digest 已有同类机制；capability manifest 尚未正式拆域 | **应采纳独立 distribution digest** |
 | policy 绑定 | policy_digest 进入 manifest_digest | policy_version/authority 有语义但无不可变 policy object digest | 应新增 policy_digest |
-| capabilities | identity 列表 | tools/skills 对象数组 | 应先投影为 identity 列表再算分发 digest |
+| capabilities | identity 列表（有序序列） | tools/skills 对象数组 | 应先投影为 identity 列表，保留声明顺序后再算分发 digest |
 | license/terms | 唯一合法住所并入 digest | v0.1 schema 缺失 | 真缺口，应新增 |
 | 数组顺序 | JCS 对数组顺序敏感 | 未冻结 | **已裁决**：peer `capabilities` 是有序序列，写时定序；顺序变化必须改变 manifest digest，不得静默排序 |
 
