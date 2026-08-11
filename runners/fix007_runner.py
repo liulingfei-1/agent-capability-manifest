@@ -72,8 +72,17 @@ class RecoveryStore:
             return False, "corruption propagation blocked"
         if target in self.recovering:
             self.recovering.discard(target)
-        atom['bucket'] = correct_bucket  # restore journal-verified metadata
-        self.journal.append(f"recover:{target}@{epoch} (rebuild_from_journal, bounded)")
+            atom['bucket'] = correct_bucket  # restore journal-verified metadata
+            self.journal.append(f"recover:{target}@{epoch} (rebuild_from_journal, bounded)")
+            self.recovery_receipt = {
+                "corruption_detected": True, "recovery_strategy": strategy,
+                "restored_atoms": [target], "digest_unchanged": True, "bounded": True
+            }
+            self.journal.append(f"verify_recovery@{epoch} (receipt emitted)")
+            return True, "recovered"
+        # already in correct state: idempotent no-op (DP-4)
+        self.journal.append(f"recover:{target}@{epoch} (NO-OP, already recovered)")
+        return True, "idempotent no-op"
         self.recovery_receipt = {
             "corruption_detected": True, "recovery_strategy": strategy,
             "restored_atoms": [target], "digest_unchanged": True, "bounded": True
@@ -176,6 +185,28 @@ def main():
 
     # discriminating pairs (Kairui C5): DP-1/2/3
     check_discriminating_pairs(store, verdicts)
+
+    # DP-4: duplicate replay / idempotency — replaying recovery twice = single recovery, no double effect
+    # use a FRESH store seeded identically to avoid journal pollution from earlier DPs
+    import copy as _copy
+    fresh = RecoveryStore(fixture)
+    fresh.clock = 1
+    fresh.inject_failure(201, 'r1')
+    ok1, _ = fresh.recover(202, 'r1')   # first recovery
+    receipt1 = dict(fresh.recovery_receipt) if fresh.recovery_receipt else None
+    j1 = len(fresh.journal)
+    ok2, _ = fresh.recover(203, 'r1')   # replay
+    j2 = len(fresh.journal)
+    check("DP4_replay_idempotent", ok1 and ok2 and (j2 - j1) <= 1,
+          f"replay idempotent: journal delta={j2-j1} (replay is no-op, no double restore)")
+
+    # DP-5: tombstoned atom but old journal holds executable record — tombstone deny wins
+    # simulate: r3 tombstoned, but journal has a pre-tombstone executable record
+    store.journal.append("journal:r3 executable record (pre-tombstone, stale)")
+    r3_recall = store.recall('withdrawn-during-outage', 209)
+    check("DP5_tombstone_deny_wins", 'r3' not in r3_recall,
+          "tombstone deny wins over stale journal record (monotonic)")
+
 
     summary = {"pass": sum(1 for v in verdicts if v["pass"]), "fail": sum(1 for v in verdicts if not v["pass"]),
                "blocked": 0, "blockers": []}
