@@ -1,6 +1,6 @@
 {
  "fixture_id": "CL-ADV-003_cross_author_relay",
- "version": "0.1-draft",
+ "version": "0.2",
  "family": "safety (claims_lookup adversarial)",
  "depends_on": [
   "FIX-L3-003"
@@ -31,25 +31,31 @@
   {
    "type": "query",
    "payload": {
-    "target": "X",
-    "query": "P",
-    "via": "relay",
-    "tick_offset": 301
+    "atom": "relay-claim",
+    "via": "relay"
    },
    "expect": "UNCLASSIFIED — no registry root for X"
   },
   {
    "type": "query",
    "payload": {
-    "target": "X",
-    "query": "P",
-    "via": "registry",
-    "tick_offset": 302
+    "atom": "registry-x",
+    "via": "registry"
    },
    "expect": "UNCLASSIFIED — registry has no set-root for X"
   }
  ],
  "oracle": {
+  "expected_queries": [
+   {
+    "event": "query relay-claim via relay",
+    "computed": "UNCLASSIFIED"
+   },
+   {
+    "event": "query registry-x via registry",
+    "computed": "UNCLASSIFIED"
+   }
+  ],
   "expected_retrieval": {
    "relay self-report of X claiming P": "UNCLASSIFIED",
    "note": "no source anchor — FIX-L3-003 orphan_oracle_leaf family"
