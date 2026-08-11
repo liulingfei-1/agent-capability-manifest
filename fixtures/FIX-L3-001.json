@@ -2,7 +2,7 @@
   "fixture_id": "FIX-L3-001",
   "version": "0.1",
   "family": "evidence-anchor",
-  "goal": "PASS baseline: evidence anchor consistent",
+  "goal": "PASS baseline",
   "expected": "PASS",
   "oracle": {
     "expected_retrieval_set": {
@@ -28,7 +28,7 @@
         "evidence_anchor": {
           "anchor_type": "oracle_path",
           "anchor_ref": "oracle.expected_retrieval_set.default_recall_at_t1",
-          "fixture_digest": "033b737e18c29fdea1bb5b96b44c638353611726c0b421a479ed219fd4342f66",
+          "fixture_digest": "f529f9a9433f508d43a9184a80a19a1d3730fe704567bb14af20e831acbd0745",
           "canonicalizer_version": "1.0",
           "verdict_evidence_refs": [
             "hits"
@@ -37,5 +37,5 @@
       }
     ]
   },
-  "canonical_digest": "033b737e18c29fdea1bb5b96b44c638353611726c0b421a479ed219fd4342f66"
+  "canonical_digest": "f529f9a9433f508d43a9184a80a19a1d3730fe704567bb14af20e831acbd0745"
 }
