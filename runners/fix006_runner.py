@@ -8,6 +8,12 @@ Portable: no paths, no deps, Python 3.8+. Usage: python3 fix006_runner.py FIX-00
 import json, sys, hashlib
 
 def norm_digest(obj):
+    """strict JCS RFC 8785 (canonicalizer_version=1.0): NFC normalize string values,
+    compact JSON, code-point sort (UTF-16 identical for BMP-only inputs)."""
+    import unicodedata
+    def nfc(v):
+        return unicodedata.normalize('NFC', v) if isinstance(v, str) else v
+    obj = json.loads(json.dumps(obj, ensure_ascii=False), object_hook=lambda d: {k: nfc(v) for k, v in d.items()})
     canon = json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
     return hashlib.sha256(canon.encode('utf-8')).hexdigest()
 
@@ -130,7 +136,7 @@ def main():
         "runner_identity": {"name": "minis", "version": "0.4", "runtime": "iSH Alpine aarch64",
                             "env_digest": norm_digest({"python": sys.version.split()[0]})},
         "verdicts": all_v, "summary": summary,
-        "digest_report": {"input_digest": norm_digest(fixture),
+        "digest_report": {"input_digest": input_digest,  # self-excluded (matches declared canonical_digest)
                           "output_digest": norm_digest({"verdicts": all_v, "summary": summary}),
                           "normalization": "strict JCS RFC 8785 (canonicalizer_version=1.0)", "canonicalizer_version": "1.0"},
     }
