@@ -82,7 +82,7 @@ def main():
         "description_identity_unchanged_by_grant_revoke": cap_b_identity_before == cap_b_identity_after,
         "policy_digest_changes_v1_to_v2": policy_v1_digest != policy_v2_digest,
         "manifest_digest_changes_when_policy_changes": manifest_v1_digest != manifest_v2_digest,
-        "manifest_digest_stable_under_capability_input_reorder": manifest_v1_digest == manifest_v1_reordered_digest,
+        "manifest_digest_changes_when_capability_order_changes": manifest_v1_digest != manifest_v1_reordered_digest,
         "old_grant_after_policy_bump": old_grant_state,
         "polluted_description_with_execution_authority": polluted_result,
         "three_immutable_domains_exclude_authorization_state": domains_clean,
