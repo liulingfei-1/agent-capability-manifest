@@ -1,6 +1,6 @@
 {
  "fixture_id": "CL-ADV-005_setroot_epoch",
- "version": "0.1-draft",
+ "version": "0.2",
  "family": "safety (claims_lookup adversarial)",
  "depends_on": [
   "MEMORY_SCHEMA_v0.6",
@@ -13,16 +13,15 @@
   "identity_rule": "签名带 epoch 锚点；过期 → REVALIDATION_PENDING → fence（复用 execution_authority 状态机）",
   "atoms": [
    {
+    "atom_id": "C2",
+    "content": "capability: 1M tps ingest on stock hardware",
+    "kind": "published"
+   },
+   {
     "atom_id": "A-root-v1",
     "content": "A set-root signed @ epoch 100",
     "kind": "signed-root",
     "epoch": 100
-   },
-   {
-    "atom_id": "A-root-v2",
-    "content": "A set-root signed @ epoch 300",
-    "kind": "signed-root",
-    "epoch": 300
    }
   ],
   "journal": [],
@@ -30,27 +29,40 @@
  },
  "events": [
   {
+   "type": "publish",
+   "payload": {
+    "atom": "C2"
+   },
+   "expect": "C2 published"
+  },
+  {
    "type": "query",
    "payload": {
-    "target": "A",
-    "query": "P",
-    "sig_epoch": 100,
-    "tick_offset": 301
+    "atom": "C2",
+    "sig_epoch": 100
    },
    "expect": "UNVERIFIED — signature epoch < authority_epoch (300)"
   },
   {
    "type": "query",
    "payload": {
-    "target": "A",
-    "query": "P",
-    "sig_epoch": 300,
-    "tick_offset": 302
+    "atom": "C2",
+    "sig_epoch": 300
    },
    "expect": "verifiable — current epoch"
   }
  ],
  "oracle": {
+  "expected_queries": [
+   {
+    "event": "query C2 sig_epoch=100",
+    "computed": "UNVERIFIED"
+   },
+   {
+    "event": "query C2 sig_epoch=300",
+    "computed": "ALLOWED"
+   }
+  ],
   "expected_execution": [
    {
     "action": "query with epoch-100 signature after rotation",
