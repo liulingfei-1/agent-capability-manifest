@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""CL-ADV runner v0.1 — Minis. Zero-dep, Python 3.8+.
-Runs claims_lookup adversarial fixtures (CL-ADV-001..005) against oracle + negative control.
-Usage: python3 cl_adv_runner.py <fixture.json>
-Semantics (simplified state machine):
-  claim status: published -> denied (append-only, keyed by claim_hash)
+"""CL-ADV runner v0.4 — Minis. Zero-dep, Python 3.8+.
+Strict oracle-comparison runner for claims_lookup adversarial fixtures (CL-ADV-001..005).
+Usage: python3 cl_adv_runner.py <fixture.json> (path REQUIRED)
+
+Semantics (state machine):
+  atom_id -> statement (from manifest.atoms); claim_hash = sha256(canon({"statement": stmt}))
+  claims: claim_hash -> status (published/denied)
+  index:  append-only chain
   query results: ALLOWED / DENIED / UNVERIFIED / UNCLASSIFIED / REJECT
+Runner EXECUTES events, COMPUTES query outcomes in order, then compares the full
+observation sequence against oracle.expected_queries (exact positional match).
 """
 import json, sys, hashlib, platform
 
@@ -17,71 +22,101 @@ def sha(obj):
 def claim_hash(statement):
     return sha({"statement": statement})
 
+class Index:
+    def __init__(self, atoms):
+        self.statements = {a["atom_id"]: a.get("content") or a.get("statement", "") for a in atoms}
+        self.claims = {}
+        self.chain = "genesis"
+        self.append_log = []
+
+    def _h(self, atom_ref):
+        if atom_ref in self.statements:
+            return claim_hash(self.statements[atom_ref])
+        return atom_ref
+
+    def publish(self, atom_ref):
+        self.claims[self._h(atom_ref)] = "published"
+        self._append("publish", atom_ref)
+
+    def deny(self, atom_ref):
+        self.claims[self._h(atom_ref)] = "denied"
+        self._append("deny", atom_ref)
+
+    def _append(self, kind, key):
+        self.chain = sha({"prev": self.chain, "append": kind, "key": key})
+        self.append_log.append((kind, key))
+
+    def query(self, atom_ref):
+        h = self._h(atom_ref)
+        if h not in self.claims:
+            return "UNCLASSIFIED"
+        return "ALLOWED" if self.claims[h] == "published" else "DENIED"
+
 def main():
     if len(sys.argv) < 2:
         sys.exit("usage: python3 cl_adv_runner.py <fixture.json> (path REQUIRED)")
-    fx = json.load(open(sys.argv[1], encoding='utf-8'))
+    fx = json.load(open(sys.argv[1], encoding="utf-8"))
     fid = fx["fixture_id"]
-    # canonical digest check (self-excluded)
     declared = fx.get("canonical_digest")
     if declared:
         d_in = {k: v for k, v in fx.items() if k != "canonical_digest"}
         assert sha(d_in) == declared, f"{fid}: canonical_digest mismatch"
-    verdicts, oracle = [], fx["oracle"]
+    idx = Index(fx["manifest"].get("atoms", []))
+    verdicts = []
+    observations = []   # ordered list of computed query outcomes
     events = fx.get("events", [])
-    state = {}          # claim_hash -> status
-    state_chain = []    # append-only chain digests
-    chain = "genesis"
+    ep = fx["manifest"].get("authority_epoch", 300)
+
+    def check(name, ok, evidence):
+        verdicts.append({"fixture_id": fid, "check": name, "pass": ok, "evidence": evidence})
+
     for ev in events:
-        t = ev["type"]
-        pl = ev.get("payload", {})
+        t, pl = ev["type"], ev.get("payload", {})
         if t == "publish":
-            state[pl["atom"]] = "published"
-            chain = sha({"prev": chain, "append": pl["atom"]})
-            state_chain.append(chain)
+            idx.publish(pl["atom"])
         elif t == "deny":
-            h = pl.get("claim_hash")
-            state[pl["atom"]] = "denied"
-            chain = sha({"prev": chain, "append": pl["atom"], "claim_hash": h})
-            state_chain.append(chain)
+            idx.deny(pl.get("claim_hash") or pl.get("atom"))
         elif t == "append":
-            chain = sha({"prev": chain, "append": pl.get("atom")})
-            state_chain.append(chain)
+            idx.deny(pl.get("atom"))
         elif t in ("recall", "query"):
-            target = pl.get("target")
-            via = pl.get("via")
-            sig_epoch = pl.get("sig_epoch")
-            ep = fx["manifest"].get("authority_epoch", 300)
-            if target and via == "relay" and pl.get("auth") is None and "registry" not in str(pl):
-                verdicts.append({"fixture_id": fid, "check": "retrieval_relay", "pass": True,
-                                 "evidence": "relay self-report -> UNCLASSIFIED (no anchor)"})
+            ref = pl.get("atom") or pl.get("claim") or pl.get("query")
+            via, auth, sig_epoch = pl.get("via"), pl.get("auth"), pl.get("sig_epoch")
+            if auth in ("forged-no-signature", "forged") or (auth is None and pl.get("sig_check") == "required"):
+                observations.append("UNVERIFIED")
+            elif via == "relay":
+                observations.append("UNCLASSIFIED")
             elif sig_epoch is not None and sig_epoch < ep:
-                verdicts.append({"fixture_id": fid, "check": "epoch_fence", "pass": True,
-                                 "evidence": f"sig_epoch {sig_epoch} < authority_epoch {ep} -> UNVERIFIED"})
-            elif pl.get("auth") == "forged-no-signature" or pl.get("auth") == "forged":
-                verdicts.append({"fixture_id": fid, "check": "query_forgery", "pass": True,
-                                 "evidence": "no valid set-root signature -> UNVERIFIED + fence"})
+                observations.append("UNVERIFIED")
             else:
-                verdicts.append({"fixture_id": fid, "check": "query_ok", "pass": True,
-                                 "evidence": "query accepted"})
+                observations.append(idx.query(ref))
         elif t in ("replay-snapshot", "replay-old-state"):
-            snap = pl.get("snapshot") or pl.get("atom") or pl.get("query")
-            # any replay of old state must REJECT: chain digest won't match current head
-            verdicts.append({"fixture_id": fid, "check": "replay_reject", "pass": True,
-                             "evidence": f"old-state replay {snap} -> REJECT (append-only)"})
+            observations.append("REJECT")
+
+    # oracle comparison: exact positional match against expected_queries
+    exp_q = fx.get("oracle", {}).get("expected_queries", [])
+    if exp_q:
+        if len(observations) != len(exp_q):
+            check("oracle_query_count", False,
+                  f"observed {len(observations)} vs oracle {len(exp_q)}: {observations}")
+        else:
+            for i, (obs, exp) in enumerate(zip(observations, exp_q)):
+                exp_v = exp.get("computed")
+                check(f"oracle_query_{i+1}", obs == exp_v,
+                      f"computed {obs} vs oracle {exp_v} ({exp.get('event','')})")
     # negative control
     nc = fx.get("negative_control", {})
-    nc_ok = nc.get("allowed") is False
-    verdicts.append({"fixture_id": fid, "check": "negative_control", "pass": nc_ok,
-                     "evidence": f"blocked_by: {nc.get('blocked_by','')}"})
+    if nc:
+        check("negative_control", nc.get("allowed") is False,
+              f"blocked_by: {nc.get('blocked_by','')}")
     summary = {"pass": sum(1 for v in verdicts if v["pass"]), "fail": sum(1 for v in verdicts if not v["pass"]),
                "blocked": 0, "blockers": []}
     report = {
-        "runner_identity": {"name": "minis", "version": "0.1", "runtime": platform.platform(),
+        "runner_identity": {"name": "minis", "version": "0.4", "runtime": platform.platform(),
                             "env_digest": sha({"python": sys.version.split()[0], "platform": platform.platform()})},
         "verdicts": verdicts, "summary": summary,
+        "observations": observations,
         "digest_report": {"input_digest": sha(fx),
-                          "output_digest": sha({"verdicts": verdicts, "summary": summary}),
+                          "output_digest": sha({"verdicts": verdicts, "summary": summary, "observations": observations}),
                           "normalization": "strict JCS RFC 8785 (canonicalizer_version=1.0)"},
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
