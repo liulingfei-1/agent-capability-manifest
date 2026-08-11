@@ -1,0 +1,126 @@
+{
+  "runner_identity": {
+    "name": "minis",
+    "version": "0.6",
+    "runtime": "Linux-4.20.69-ish-aarch64-with",
+    "env_digest": "4ea8eecbcc15a59e1b0284b0788e1baa45943fb3b841dded68f2f7a6a3060e40"
+  },
+  "verdicts": [
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "main",
+      "check": "status_exact",
+      "pass": true,
+      "evidence": "kind=durable expected=promoted_to_durable promote event present",
+      "full_digest": "d22c26d307eb1a5b96b8bf4c5c02e5fcfe2e1719df32cf1b0e74ae233948bfdc"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "main",
+      "check": "identity_digest",
+      "pass": true,
+      "evidence": "id=A digest=d5fd7948e1b2",
+      "full_digest": "ae27d482e4727f3460268d052fd06ea35d563eb5125446cc9bfe2bbfb48c82db"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "main",
+      "check": "promote_count",
+      "pass": true,
+      "evidence": "promote_events=1",
+      "full_digest": "74741516852feacd04337cadcd363a3b23da4929cc045798fdc263ce4b83df53"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-1",
+      "check": "status_exact",
+      "pass": true,
+      "evidence": "kind=durable expected=promoted_after_aging audit order: aged@0 < promoted@2",
+      "full_digest": "063864e8740932413d480868a4c2de725ffb30612b35bcff6913a67676b770b8"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-1",
+      "check": "identity_digest",
+      "pass": true,
+      "evidence": "id=A digest=d5fd7948e1b2",
+      "full_digest": "575e8fc1e806e207b0962e02d541535bd787561cdde3e26bf7d30fd9732ab640"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-1",
+      "check": "promote_count",
+      "pass": true,
+      "evidence": "promote_events=1",
+      "full_digest": "5a8235ee1dc666ef7df3dd442b2bae21f304c957d1901c92b6d1b647513163b0"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-2",
+      "check": "status_exact",
+      "pass": true,
+      "evidence": "kind=durable expected=durable ",
+      "full_digest": "51955a756e15cce3990a3e7f385bccddd594e55c78cbeae62738573739d2ea94"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-2",
+      "check": "identity_digest",
+      "pass": true,
+      "evidence": "id=A digest=d5fd7948e1b2",
+      "full_digest": "85ee0184fcd779136f6a02852cda8569b13c942329758ca112d7ed09de92eb4e"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-2",
+      "check": "promote_count",
+      "pass": true,
+      "evidence": "promote_events=1",
+      "full_digest": "7e2cbc3c4b647e50aede10c26a5bb1d620b3077586f04e93e0795746a39d8b59"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-3",
+      "check": "status_exact",
+      "pass": true,
+      "evidence": "kind=durable expected=promoted_to_durable promote event present | BLOCKED consumed (no AGED after PROMOTED)",
+      "full_digest": "6fe0a7a9cd6dc5aa4cde9c4f2168e71c76cd9b2a0264d5eee6aeeaf1d4d07a09"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-3",
+      "check": "identity_digest",
+      "pass": true,
+      "evidence": "id=A digest=d5fd7948e1b2",
+      "full_digest": "dc93564e3839c2cb3cd76af7debf4fa7d9f81d22cf618cd9ea76e92206365a21"
+    },
+    {
+      "fixture_id": "FIX-006",
+      "scenario": "NEG-006-3",
+      "check": "promote_count",
+      "pass": true,
+      "evidence": "promote_events=1",
+      "full_digest": "152362d4d58e38d353f1e192e76be0f9f41f9e9540d77b9c03d4395445f7e8f4"
+    }
+  ],
+  "summary": {
+    "pass": 12,
+    "fail": 0,
+    "blocked": 0,
+    "blockers": []
+  },
+  "trace": {
+    "observed_event_order": [
+      "admit@0ms",
+      "reference@3540000ms",
+      "aging_tick@3660000ms"
+    ],
+    "final_elapsed_ms": 3660000
+  },
+  "digest_report": {
+    "input_digest": "40efe29f2235709d57b00664857467d08cac0575ac2f0e5e802b526ee1442716",
+    "output_digest": "67ed23721a47ebb297c51c6aea663a2a4a82b474d6660f22bdf361262a13824c",
+    "normalization": "strict JCS RFC 8785 (canonicalizer_version=1.0)",
+    "canonicalizer_version": "1.0"
+  }
+}
