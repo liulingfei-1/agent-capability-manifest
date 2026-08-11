@@ -25,7 +25,7 @@ AI agent 世界缺三样东西，本仓库给三件套：
 
 ### 2. Cross-Runtime Regression Suite v2 — 记忆系统的"驾考"
 
-一套标准考试卷（fixture），考 agent 的记忆系统。任何环境（iPhone/Windows/Linux/云端）都能跑。**16 个 fixture、6 组主题**：
+一套标准考试卷（fixture），考 agent 的记忆系统。任何环境（iPhone/Windows/Linux/云端）都能跑。**17 个 fixture、7 组主题**：
 
 | 组 | 考什么 | 状态 |
 |---|---|---|
@@ -35,6 +35,7 @@ AI agent 世界缺三样东西，本仓库给三件套：
 | FIX-008 | direction-mixing（demote 重放为 promote 必须 BLOCKED）| ✅ 8/8（v0.2 direction 进 identity）|
 | FIX-L3 001-006 | evidence-anchor 断言验证（failure_class 体系）| ✅ 双实现对拍闭环 |
 | CL-ADV 001-005 | claims_lookup 对抗（deny 重放/查询伪造/跨作者/状态链/set-root 过期）| ✅ 5/5（Stone 线，v0.2 提案）|
+| CAP-3D-001 | description/distribution/policy 三域不可变性 + 授权 receipt 隔离 | ✅ 7/7（peer v0.2 divergence fixture）|
 
 **验证战绩（3 独立运行时全绿）**：
 
@@ -60,15 +61,16 @@ AI agent 世界缺三样东西，本仓库给三件套：
 - **CD-4c fixture interchange 合流**（2026-08-11）：cross-spec mapping v0.3 + LIVENESS 新轴提议 + partial-fixture 回归类（注记 8）已进 **8/17 对拍提交包**，经 CD-4c 核心作者（OpenClaw）review 无阻塞通过；LIVENESS 轴获 CD-4c 侧认可（8/17 群体共识）
 - **L3 evidence-anchor 对拍**：与一牙联合设计 FIX-L3 矩阵，双实现验证闭环（6/6 匹配）
 - **Munin direction 合流**：direction 进 identity（v0.2）+ supersession 谱系 + EA-01~04 对账 4/4 对齐
-- **独立验证**：Codex（用户侧）字节级核验推进中（FIX-005/006 已 PASS，固定 commit tag）
+- **独立验证**：Codex（用户侧）字节级核验推进中；Minis 侧完整材料可复算，第三方完整 report objects 齐备前不升级正式跨运行时结论
 - **awesome-ai-agents**（★29K）：收录 PR #1373｜**awesome-agent-evolution**：Benchmarks 收录 PR #42
-- **CI**：仓库自带 fixture 自动验证（FIX-005/006 + canonical digest 检查）
+- **receipt/schema 合流**：`docs/RECEIPT_SCHEMA_CROSSWALK_v0.1.md` + `docs/MANIFEST_THREE_DIGEST_CROSSWALK_v0.1.md` 固化 CD-4c 字段对照、三域 divergence 与 8/17 swap 协议
 
 ## 目录结构
 
 ```
 docs/       Manifest v0.1 · Regression v2 Contract · Memory Schema v0.6 · 基准锚 · 映射文档 · 测试向量
-fixtures/   CAP-001, FIX-001~008, FIX-L3-001~006, CL-ADV-001~005（含 canonical digest）
+fixtures/   CAP-001, FIX-001~008, FIX-L3-001~006, CL-ADV-001~005, CAP-3D-001（含 canonical digest）
+    contrib/  CD-4c 8/17 third-party fixture submission packs
 runners/    fix005/006/007/008 + fixl3（零依赖，Python 3.8+）
 verdicts/   多方验证结果 + digest 对账记录
 ```
@@ -85,6 +87,10 @@ python3 runners/fix008_runner.py fixtures/FIX-008_direction_mixing.json
 python3 runners/fixl3_runner.py fixtures/FIX-L3-001.json
 # 跑 CL-ADV 对抗 fixture
 python3 runners/cl_adv_runner.py fixtures/CL-ADV-001_deny_tombstone_replay.json
+# 跑 CAP-3D-001 三域不可变性 fixture
+python3 runners/cap3d_runner.py fixtures/CAP-3D-001_three_digest_domains.json
+# 跑 CAP-3D-001 三域不可变性 fixture
+python3 runners/cap3d_runner.py fixtures/CAP-3D-001_three_digest_domains.json
 ```
 
 输出：`runner_identity + verdicts + summary + coverage_report + digest_report`（完整 64 位 digest，canonicalizer_version 标注）。
