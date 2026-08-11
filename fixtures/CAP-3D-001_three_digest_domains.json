@@ -1,0 +1,204 @@
+{
+  "fixture_id": "CAP-3D-001_three_digest_domains",
+  "version": "0.1-proposed",
+  "family": "capability-manifest/three-immutable-digest-domains",
+  "date": "2026-08-11",
+  "provenance": {
+    "peer_fields_source": "EigenFlux agent 336460331704385536",
+    "peer_fixed_commit": "30035aa",
+    "analysis": "docs/MANIFEST_THREE_DIGEST_CROSSWALK_v0.1.md"
+  },
+  "profiles": {
+    "description_identity": "jcs-description/v1",
+    "distribution_manifest": "jcs-distribution/v1-proposed-set-order",
+    "policy": "jcs-policy/v1",
+    "canonicalization": "JCS-compatible for string/list/object-only fixtures + recursive NFC"
+  },
+  "manifest": {
+    "goal": "Verify description/distribution/policy immutability and keep authorization in append-only receipts.",
+    "ordering_semantics": "capabilities are a set; sort lowercase 64hex identities ascending before digest",
+    "security_boundary": {
+      "fixture_is_data_only": true,
+      "network_calls_required": false,
+      "credentials_required": false
+    }
+  },
+  "objects": {
+    "descriptions": {
+      "cap_a": {
+        "capability_id": "cap:text-quality-check",
+        "name": "Chinese prose quality check",
+        "description": "Detect rhetorical repetition, vague jargon and unsupported reversals.",
+        "effect_scope": "text:analysis-only"
+      },
+      "cap_b": {
+        "capability_id": "cap:fixture-replay",
+        "name": "Cross-runtime fixture replay",
+        "description": "Replay data-only manifest+events+oracle fixtures without side effects.",
+        "effect_scope": "fixture:read-only"
+      }
+    },
+    "policies": {
+      "v1": {
+        "policy_id": "policy:fixture-execution",
+        "version": "1",
+        "rules": [
+          "fixture_is_data_only",
+          "network_calls_forbidden",
+          "credentials_forbidden"
+        ]
+      },
+      "v2": {
+        "policy_id": "policy:fixture-execution",
+        "version": "2",
+        "rules": [
+          "fixture_is_data_only",
+          "network_calls_forbidden",
+          "credentials_forbidden",
+          "static_review_required"
+        ]
+      }
+    },
+    "distributions": {
+      "v1": {
+        "manifest_id": "manifest:minis-public-capabilities",
+        "version": "0.2-proposed",
+        "policy_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
+        "capabilities": [
+          "02131517c942534200d38b776cdbddaebf9a43b91f56a8397c1382f61adcad0f",
+          "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6"
+        ],
+        "licenses": [
+          "MIT"
+        ],
+        "distribution_terms": [
+          "public-read",
+          "fixture-replay-permitted"
+        ],
+        "ordering_semantics": "set:sort-lowercase-identity-hex-ascending"
+      },
+      "v1_reordered_input": {
+        "manifest_id": "manifest:minis-public-capabilities",
+        "version": "0.2-proposed",
+        "policy_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
+        "capabilities": [
+          "02131517c942534200d38b776cdbddaebf9a43b91f56a8397c1382f61adcad0f",
+          "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6"
+        ],
+        "licenses": [
+          "MIT"
+        ],
+        "distribution_terms": [
+          "public-read",
+          "fixture-replay-permitted"
+        ],
+        "ordering_semantics": "set:sort-lowercase-identity-hex-ascending"
+      },
+      "v2": {
+        "manifest_id": "manifest:minis-public-capabilities",
+        "version": "0.2-proposed",
+        "policy_digest": "0a4737f83058769120a5ef3f1b089319ababf893e4366750be45a8aa85bc036b",
+        "capabilities": [
+          "02131517c942534200d38b776cdbddaebf9a43b91f56a8397c1382f61adcad0f",
+          "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6"
+        ],
+        "licenses": [
+          "MIT"
+        ],
+        "distribution_terms": [
+          "public-read",
+          "fixture-replay-permitted"
+        ],
+        "ordering_semantics": "set:sort-lowercase-identity-hex-ascending"
+      }
+    },
+    "receipts": {
+      "grant_v1": {
+        "receipt_type": "CAPABILITY_GRANT",
+        "capability_identity": "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6",
+        "manifest_digest": "1505b6f8fd2be1ac2e5de2eb803ff08a909b665e6e6b48920dacca216530778f",
+        "policy_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
+        "epoch": 100,
+        "policy_version": "1",
+        "evidence_state": "PASS",
+        "operational_disposition": "ACTIVE",
+        "previous_receipt_digest": null
+      },
+      "revoke_v1": {
+        "receipt_type": "CAPABILITY_REVOKE",
+        "capability_identity": "975c505f319e1e3c3793a7f32705d739408a9872a8ac2f7dc6a88aec7fd083b6",
+        "manifest_digest": "1505b6f8fd2be1ac2e5de2eb803ff08a909b665e6e6b48920dacca216530778f",
+        "policy_digest": "ba7b06ff311af712ba01ae7a101a246f357f047a0bf860677e3c089fa32f9809",
+        "epoch": 101,
+        "policy_version": "1",
+        "evidence_state": "PASS",
+        "operational_disposition": "REJECT",
+        "previous_receipt_digest": "8bcdb32a854fb5bb7ec95f27841c176f46574591c74b0a1861ff4924a8c706eb"
+      }
+    },
+    "negative_controls": {
+      "polluted_description": {
+        "capability_id": "cap:fixture-replay",
+        "name": "Cross-runtime fixture replay",
+        "description": "Replay data-only manifest+events+oracle fixtures without side effects.",
+        "effect_scope": "fixture:read-only",
+        "execution_authority": "ACTIVE"
+      }
+    }
+  },
+  "events": [
+    {
+      "type": "publish_description",
+      "ref": "cap_b"
+    },
+    {
+      "type": "publish_policy",
+      "ref": "v1"
+    },
+    {
+      "type": "publish_distribution",
+      "ref": "v1"
+    },
+    {
+      "type": "append_receipt",
+      "ref": "grant_v1"
+    },
+    {
+      "type": "append_receipt",
+      "ref": "revoke_v1"
+    },
+    {
+      "type": "publish_policy",
+      "ref": "v2"
+    },
+    {
+      "type": "publish_distribution",
+      "ref": "v2"
+    },
+    {
+      "type": "evaluate_old_grant",
+      "ref": "grant_v1",
+      "against_policy": "v2"
+    },
+    {
+      "type": "admit_negative_control",
+      "ref": "polluted_description"
+    }
+  ],
+  "oracle": {
+    "expected": {
+      "description_identity_unchanged_by_grant_revoke": true,
+      "policy_digest_changes_v1_to_v2": true,
+      "manifest_digest_changes_when_policy_changes": true,
+      "manifest_digest_stable_under_capability_input_reorder": true,
+      "old_grant_after_policy_bump": {
+        "evidence_state": "INDET",
+        "operational_disposition": "HOLD"
+      },
+      "polluted_description_with_execution_authority": "REJECT",
+      "three_immutable_domains_exclude_authorization_state": true
+    }
+  },
+  "semantics_note": "This fixture proposes set-order canonicalization locally; peer review must confirm whether capabilities is a set or ordered sequence before shared-core lock.",
+  "canonical_digest": "005abf8446d8d2a9b8d3cfd9a1a3cdecd95dd14ee260f4cd7cf13325ec52464d"
+}
