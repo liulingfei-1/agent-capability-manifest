@@ -8,12 +8,21 @@ Portable: no paths, no deps, Python 3.8+. Usage: python3 fix006_runner.py FIX-00
 import json, sys, hashlib
 
 def norm_digest(obj):
-    """strict JCS RFC 8785 (canonicalizer_version=1.0): NFC normalize string values,
-    compact JSON, code-point sort (UTF-16 identical for BMP-only inputs)."""
+    """strict JCS RFC 8785 (canonicalizer_version=1.0): RECURSIVE NFC normalization
+    of all string values (dict + list), compact JSON, code-point sort.
+    Note: code-point sort == UTF-16 sort for BMP-only inputs; astral-plane inputs
+    require UTF-16 code-unit sort for full RFC 8785 conformance (covered by
+    canonicalizer negative tests T-JCS-001)."""
     import unicodedata
-    def nfc(v):
-        return unicodedata.normalize('NFC', v) if isinstance(v, str) else v
-    obj = json.loads(json.dumps(obj, ensure_ascii=False), object_hook=lambda d: {k: nfc(v) for k, v in d.items()})
+    def nfc_recursive(v):
+        if isinstance(v, str):
+            return unicodedata.normalize('NFC', v)
+        if isinstance(v, list):
+            return [nfc_recursive(i) for i in v]
+        if isinstance(v, dict):
+            return {k: nfc_recursive(val) for k, val in v.items()}
+        return v
+    obj = nfc_recursive(obj)
     canon = json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
     return hashlib.sha256(canon.encode('utf-8')).hexdigest()
 
