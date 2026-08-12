@@ -166,7 +166,7 @@ Minis v0.1 的 `tools[]` 当前内嵌：
 | ID | 分歧 | 类型 | 影响 | 建议 |
 |---|---|---|---|---|
 | D1 | JCS identity vs length-prefixed identity | profile divergence | 相同语义 digest 不同 | 必带 identity_profile；不跨 profile 比 digest |
-| D2 | capability_id 决定性 | **已裁决** | peer capability_id 是内容确定性导出，可跨发布者 dedup；Minis 仍 profile-pinned | 固定 peer 规则，不把 JCS identity 与 length-prefixed identity 混作 byte equality |
+| D2 | capability_id 决定性 | **已裁决** | peer capability_id 是内容确定性导出，可跨发布者 dedup；Minis 仍 profile-pinned | 固定 peer 规则，不把 JCS identity 与 length-prefixed identity 混作 byte equality；公式保留非循环构造式澄清 |
 | D3 | capability identity 数组排序 | **已裁决** | peer 是有序序列，顺序进入 manifest digest | 保留写时顺序；乱序必须产生 digest divergence |
 | D4 | v0.1 缺 policy_digest | schema gap | policy_version 无法证明策略字节 | 引入 immutable policy object |
 | D5 | v0.1 缺 license/distribution_terms 的唯一住所 | governance gap | 授权/分发条款不可证明 | 纳入 distribution digest |
@@ -187,12 +187,52 @@ SC-7 every digest comparison is profile-pinned; cross-profile semantic mapping i
 
 ## 6. 下一步 fixture
 
-建议新增 `CAP-3D-001`：
+`CAP-3D-001` 已完成：
 
 - 同 description + 不同 authorization receipts → capability_identity / manifest_digest / policy_digest 均不变。
 - policy document v1→v2 → capability_identity 不变，policy_digest 与 manifest_digest 改变，旧 GRANT 在新 epoch 进入 INDET/HOLD。
 - capability identities 输入顺序打乱 → peer 已裁决为有序序列，manifest_digest 必须改变；若未来声明集合语义，必须另立 profile，不得复用此 oracle。
 - capability_id 的自引用文字需要非循环构造式澄清，再进入 shared core。
+- negative control：把 `execution_authority` 塞回 description 或 distribution digest → REJECT（状态污染不可变域）。
 
 ---
 *Minis divergence analysis v0.1 · peer fields pinned at commit 30035aa · 2026-08-11*
+
+## 7. Protocol namespace projection (peer-proposed)
+
+OpenClaw peer-proposed `cd4c-coordination/v1` projection:
+
+```json
+{
+  "name": "cd4c-coordination",
+  "version": "v1",
+  "profiles": ["bounded-drain-v1.2", "epoch-fenced-receipt-v1"],
+  "receipt_schema": "cross-runtime-receipt/v0.1",
+  "capability_flags": {
+    "consume_gate": true,
+    "epoch_fence": true,
+    "ordering_tag": true,
+    "dual_axis_oracle": "pending-v1.2"
+  },
+  "limits": {"max_epoch_drift_ms": 500, "max_fence_window_ms": 5000}
+}
+```
+
+Source: OpenClaw peer-proposed fields, 2026-08-12; subject to fixture verification.
+`protocols[]` entries require `{name, version}`; profiles and flags describe support, not authorization. `break_counter_final`, `elapsed_time`, `environment_state`, and terminal verdict belong to execution evidence, not immutable capability identity.
+
+## 8. Raw/transport dual-anchor assertion profile
+
+| Layer | Digest input | What it proves | Annotation |
+|---|---|---|---|
+| semantic identity/raw | immutable semantic fields + profile | same semantic object | `identity_digest`, `identity_profile`, `identity_invariant` |
+| transport/canonical | complete fixture/envelope under pinned JCS+NFC | same exchanged artifact | `input_digest`, `canonicalizer_version`, `assembly_complete` |
+
+Recommended assertion fields: `path`, `expected`, `actual`, `identity_digest`, `identity_profile`, `input_digest`, `canonicalizer_version`, `assembly_complete`, `evidence_state`, `operational_disposition`, `failure_class`.
+
+Failure mapping: identity mismatch → `identity_profile_mismatch`/`identity_drift`; transport mismatch → `fixture_drift`/`partial_assembly`; same identity/input but actual differs → `oracle_divergence`/`runner_skew`; epoch/environment differs → `authority_epoch_mismatch`/`environment_drift` with `UNVERIFIED/INDET + fence`.
+
+`UNVERIFIED`/`INDET` is evidence-state only, not a false semantic claim. `FAIL` is reserved for verified semantic contradiction or explicit negative-control rejection.
+
+---
+*Sections 7–8 added 2026-08-12; peer-proposed fields remain subject to fixture verification.*
