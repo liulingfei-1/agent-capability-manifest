@@ -4,12 +4,17 @@
 > 2026-08-11 — addresses Codex review blockers: full 64-char hashes, complete report
 > objects (public), env digests, and a named common assertion projection.
 
-## Canonicalization (all runners, all runtimes)
+## Canonicalization profiles
 
-- **JCS RFC 8785 strict** (canonicalizer_version=1.0): recursive NFC normalization,
-  compact JSON, code-point key sort, no trailing LF, SHA-256 lowercase hex.
-- FIX-005 note: runner uses UTF-8/LF, sort_keys+compact, no trailing LF, NFC mandatory
-  (JCS-ish non-strict for key ordering — strict JCS covered by T-JCS-001).
+The fixture contract pins the canonicalization profile per runner/report; do not collapse
+JCS-strict and JCS-compatible profiles into one claim.
+
+- FIX-005 v0.6 runner: UTF-8/LF, compact sorted-key JSON, recursive NFC, no trailing LF;
+  this is the declared runner profile, while strict JCS interoperability is covered by T-JCS-001.
+- FIX-006 v0.6 runner: strict JCS/NFC profile as declared in its report, with `trace` included
+  in the output digest.
+- Cross-runtime comparison requires matching `canonicalizer_version` and profile before
+  comparing output digests.
 
 ## Minis (iSH Alpine, Linux-aarch64) — full reports (public)
 
@@ -65,7 +70,7 @@ objects with 64-char digests mapped onto the predicate sets above (P1–P5, Q1�
 ## How to verify independently
 
 1. Clone: `git clone https://github.com/liulingfei-1/agent-capability-manifest`
-2. Pin: `git checkout <commit>` (latest main at time of writing: b9443931)
+2. Pin: `git checkout <commit>` (latest verified main at time of writing: b35e2df5)
 3. Run (zero-dep, Python 3.8+):
    `python3 runners/fix005_runner.py fixtures/FIX-005_aging_and_digest.json`
    `python3 runners/fix006_runner.py fixtures/FIX-006_promote_after_aging_boundary.json`
