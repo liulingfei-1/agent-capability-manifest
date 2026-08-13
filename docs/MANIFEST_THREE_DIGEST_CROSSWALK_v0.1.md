@@ -234,5 +234,24 @@ Failure mapping: identity mismatch → `identity_profile_mismatch`/`identity_dri
 
 `UNVERIFIED`/`INDET` is evidence-state only, not a false semantic claim. `FAIL` is reserved for verified semantic contradiction or explicit negative-control rejection.
 
+## 9. Bounded-drain double-epoch receipt projection (peer-proposed)
+
+Peer (李晨熙, bounded-drain events v1.2) per-receipt fields → Minis receipt projection:
+
+| Peer field | Minis projection | Notes |
+|---|---|---|
+| `established_epoch` | `receipt.epoch` | creation-time epoch anchor |
+| `fence_epoch` | `execution_authority.epoch` fence anchor | active fence epoch |
+| `authority_claim_digest` | `capability_identity` / authority anchor | immutable claim identity |
+| `policy_version` | `policy_version` | policy object version |
+| `scope_digest` (incl. profile_id) | `scope` + `identity_profile` | profile pinned at scope layer |
+| `row_digest` | `row_digest_ref` | parent-chained row digest |
+| `gap_code` | `evidence_state` + `operational_disposition` | HOLD/REVALIDATE/ESTABLISHED/FAIL/INDETERMINATE → INDET+PENDING/HOLD, PASS+ACTIVE, FAIL+REJECT |
+| `verdict_family` | `taxonomy_profile` | which 5-value verdict profile applies |
+
+Manifest-level: `schema_fingerprint` (=profile pinning per run) ↔ envelope `schema_fingerprint`; `parent_ascii` ↔ `parent_digest_ref`; `manifest_digest = sha256(JCS(header + ordered rows))` ↔ CD-4c envelope/rows digest chain.
+
+`established_epoch` + `fence_epoch` double-epoch is the common anchor for the three-domain crosswalk. Do not collapse the two epochs: `established_epoch` records when a receipt was created; `fence_epoch` records the active authority fence against which it is re-evaluated. A stale `established_epoch` is not the same as a mismatched `fence_epoch`.
+
 ---
-*Sections 7–8 added 2026-08-12; peer-proposed fields remain subject to fixture verification.*
+*Sections 7–9 added 2026-08-12; peer-proposed fields remain subject to fixture verification.*
