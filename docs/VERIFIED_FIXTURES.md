@@ -15,6 +15,8 @@
 |---|---|---|---|---|---|---|
 | minis:FIX-005 | FIX-005 | v0.4 | fix005_runner.py v0.6 (minis) | 8cd161245579bd42f9b7f121d5723acd2b553da9c1c4f20db772907763f8ade2 | PASS | ACTIVE |
 | minis:FIX-006 | FIX-006 | v0.2-locked | fix006_runner.py v0.6 (minis) | 40efe29f2235709d57b00664857467d08cac0575ac2f0e5e802b526ee1442716 | PASS | ACTIVE |
+| minis:CD4C-E4 | CD4C-E4 | v0.1-byteform | cd4c_toctou_runner.py v0.2 (minis) | aef61dd48b6af596b81a794b0a951def87f732a12a6a0664f5ccbd6d5948aa1d | PASS | ACTIVE |
+| minis:CD4C-E5 | CD4C-E5 | v0.1-byteform | cd4c_toctou_runner.py v0.2 (minis) | 09608d895bf5032460fd77a47287ffe6a86361b70e1b7ab60440043d9e4d57f7 | PASS | ACTIVE |
 | minis:FIX-007 | FIX-007 | v0.2 | fix007_runner.py v0.3 (minis) | 4126aa999c7026b4d42ab2e79d2075c3bf1d937e362a027a7e189672c0aa64cf | PASS | ACTIVE |
 | minis:FIX-L3-001 | FIX-L3-001 | v0.1 | fixl3_runner.py v0.1 (minis) | f529f9a9433f508d43a9184a80a19a1d3730fe704567bb14af20e831acbd0745 | PASS | ACTIVE |
 | minis:FIX-L3-002 | FIX-L3-002 | v0.1 | fixl3_runner.py v0.1 (minis) | d73d973e0330e5468609b412c5a539f800a014cea1f29438304da23e6ad8be63 | FAIL (evidence_anchor_mismatch) | REJECT |
@@ -39,5 +41,12 @@
 - **operational disposition** = 操作处置（ACTIVE/REJECT/HOLD+fence）——UNVERIFIED 证据状态对应 HOLD/fence 处置（凯瑞拆分建议）
 - 跨实现对拍：同配对键 + 同 canonicalizer_version 下比 digest
 
+## CD4C-E4/E5 补充说明（2026-08-14）
+
+- CD4C-E4/E5 按 docs/fixture-interchange-spec.md 对齐：cd4c-fixture-v1 envelope、6 字段行格式、`row_digest=SHA256(parent_ascii ‖ JCS(row))`、canonicalizer_version=1
+- E4 含 masked-replay 负控（同 epoch 序号 intent 变化 → FAIL）；E5 含三轴偏序负控（read>admit、admit>receipt → FAIL）
+- 官方 CD-4c tools/verify.py 复验：双 ALL ROWS VERIFIED；本地 runner E4 7/7、E5 6/6
+- 已提 PR #3（fixtures/cd4c/Minis-E4-epoch-monotonic-sequence.json + Minis-E5-three-epoch-partial-order.json），8/17 对拍交付
+
 ---
-*Minis · 2026-08-11 v0.2，凯瑞细化建议落地*
+*Minis · 2026-08-14 v0.3，E4/E5 基准锚 + 凯瑞细化建议落地*
