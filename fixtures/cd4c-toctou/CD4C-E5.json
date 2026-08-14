@@ -1,0 +1,123 @@
+{
+  "fixture_id": "CD4C-E5",
+  "family": "TOCTOU/three-epoch-partial-order",
+  "contributor": "Minis",
+  "version": "0.1-byteform",
+  "canonicalizer_version": "v1",
+  "envelope": {
+    "trigger_epoch": 100,
+    "completed_effect_ids": [
+      "pe-0"
+    ],
+    "pending_effect_ids": [
+      "pe-1",
+      "pe-2",
+      "pe-3",
+      "pe-4"
+    ],
+    "window_deadline": 110,
+    "policy_version": "v1.1.0",
+    "evidence_digest": "849c5418293bf63162b364ae4f9c5175fcb021920ff01762f35dace323ba558e"
+  },
+  "rows": [
+    {
+      "read_epoch": 100,
+      "admit_epoch": 100,
+      "receipt_bound_epoch": 100,
+      "completed_effect_ids": [
+        "pe-0"
+      ],
+      "pending_effect_ids": [],
+      "window_deadline": 110,
+      "policy_version": "v1.1.0",
+      "partial_order": "read <= admit <= receipt_bound",
+      "evidence_digest": "5c5edf2b07ad0b8bc3ce498a8b784ba5ddafceebe5c8d53708fec9cd60b82cc1",
+      "parent_digest_ref": "0f65a2479a971b3216b393454e59e8de7363da25ddf218f8a566bacd747ea7c0",
+      "row_digest_ref": "26b3581379b42013e0d3283b78fc0914348892bedea2c63eab0d3df8c51a1a8b"
+    },
+    {
+      "read_epoch": 100,
+      "admit_epoch": 101,
+      "receipt_bound_epoch": 102,
+      "completed_effect_ids": [
+        "pe-1"
+      ],
+      "pending_effect_ids": [],
+      "window_deadline": 112,
+      "policy_version": "v1.1.0",
+      "partial_order": "read <= admit <= receipt_bound",
+      "evidence_digest": "b9bc30cd1e3f314099d8daad16d17f991bd8302733b3c1796cdf2c7ef377e0d4",
+      "parent_digest_ref": "26b3581379b42013e0d3283b78fc0914348892bedea2c63eab0d3df8c51a1a8b",
+      "row_digest_ref": "b1e7de264a0fd8f45869647e83ecee72316f0699b7aaf0fd625f8667f33cab86"
+    },
+    {
+      "read_epoch": 101,
+      "admit_epoch": 102,
+      "receipt_bound_epoch": 102,
+      "completed_effect_ids": [
+        "pe-2"
+      ],
+      "pending_effect_ids": [],
+      "window_deadline": 112,
+      "policy_version": "v1.1.0",
+      "partial_order": "read <= admit <= receipt_bound",
+      "evidence_digest": "b1ad48904e4470e4b5df957644b4b291033bf276b83b8676e68cb74eec0ccbf6",
+      "parent_digest_ref": "b1e7de264a0fd8f45869647e83ecee72316f0699b7aaf0fd625f8667f33cab86",
+      "row_digest_ref": "b59a2d6c5d0e5bf31be1b8c72b5659312377fdc74ed87daf09b4531d07f3b856"
+    },
+    {
+      "read_epoch": 102,
+      "admit_epoch": 102,
+      "receipt_bound_epoch": 103,
+      "completed_effect_ids": [
+        "pe-3"
+      ],
+      "pending_effect_ids": [],
+      "window_deadline": 113,
+      "policy_version": "v1.1.0",
+      "partial_order": "read <= admit <= receipt_bound",
+      "evidence_digest": "ee317140ec4dcb50c0658266014c338098c8191347f12f9589faae393bbae19c",
+      "parent_digest_ref": "b59a2d6c5d0e5bf31be1b8c72b5659312377fdc74ed87daf09b4531d07f3b856",
+      "row_digest_ref": "964728b81ab515a795396a2fe505af0ca3ef3a8994c697ecdd4737b4bdef1018"
+    },
+    {
+      "read_epoch": 102,
+      "admit_epoch": 103,
+      "receipt_bound_epoch": 104,
+      "completed_effect_ids": [
+        "pe-4"
+      ],
+      "pending_effect_ids": [],
+      "window_deadline": 114,
+      "policy_version": "v1.1.0",
+      "partial_order": "read <= admit <= receipt_bound",
+      "evidence_digest": "f845fc267cf4738081ef2a5683e42886f7571f8fa6d9686f31ccc483c65dd155",
+      "parent_digest_ref": "964728b81ab515a795396a2fe505af0ca3ef3a8994c697ecdd4737b4bdef1018",
+      "row_digest_ref": "f4ecf2d58d4fc2152450e77a7d3c34e749093bb1ed4e274a930183d78355afab"
+    }
+  ],
+  "negative_controls": [
+    {
+      "fixture_id": "CD4C-E5-NEG-001",
+      "action": "read_epoch=102 > admit_epoch=101",
+      "expected": "REJECT (partial order violated: read > admit)",
+      "typed_trigger": "epoch_partial_order_violation"
+    },
+    {
+      "fixture_id": "CD4C-E5-NEG-002",
+      "action": "admit_epoch=103 > receipt_bound_epoch=102",
+      "expected": "REJECT (partial order violated: admit > receipt_bound)",
+      "typed_trigger": "epoch_partial_order_violation"
+    }
+  ],
+  "oracle": {
+    "expected_partial_order": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "chain_head": "f4ecf2d58d4fc2152450e77a7d3c34e749093bb1ed4e274a930183d78355afab"
+  }
+}
