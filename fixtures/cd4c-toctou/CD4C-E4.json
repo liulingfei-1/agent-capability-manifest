@@ -95,9 +95,9 @@
     },
     {
       "fixture_id": "CD4C-E4-NEG-002",
-      "action": "global_sequence_number replay 1,2,3,3",
-      "expected": "INDET + REJECT (sequence not strictly increasing)",
-      "typed_trigger": "sequence_replay"
+      "action": "global_sequence_number replay 1,2,3,3 (same epoch sequence number, different intent)",
+      "expected": "INDET + REJECT (sequence not strictly increasing; same epoch index with changed intent is masked replay)",
+      "typed_trigger": "sequence_replay_with_intent_change"
     }
   ],
   "oracle": {
