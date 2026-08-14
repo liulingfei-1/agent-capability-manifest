@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CI verification: run core regressions plus adversarial and three-digest fixtures.
+"""CI verification: run core regressions, adversarial, three-digest, and CD4C TOCTOU fixtures.
 Exit 0 = verified; exit 1 = any failure."""
 import glob
 import hashlib
@@ -54,6 +54,9 @@ run_runner(
     "fixtures/CAP-3D-001_three_digest_domains.json",
     "59d9a8ec698d",
 )
+
+run_runner("CD4C-E4", "runners/cd4c_toctou_runner.py", "fixtures/cd4c-toctou/CD4C-E4.json", "aef61dd48b6a")
+run_runner("CD4C-E5", "runners/cd4c_toctou_runner.py", "fixtures/cd4c-toctou/CD4C-E5.json", "09608d895bf5")
 
 f5 = json.load(open(os.path.join(BASE, "fixtures/FIX-005_aging_and_digest.json")))
 if norm_digest({k: v for k, v in f5.items() if k != "canonical_digest"}) != f5.get("canonical_digest"):
