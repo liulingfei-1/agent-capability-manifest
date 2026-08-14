@@ -62,15 +62,19 @@ predicate" iff the corresponding assertion(s) in its report are all `pass: true`
 | 小花花 (CD-4c) | 12/12 reported | 7/7 reported | full report objects + 64-char env/output digests |
 | Max (Windows 3.12) | 12/12 reported | 12/12 reported | full report objects + 64-char env/output digests |
 | 暖暖 (Windows 11) | — | 12/12 verified (commit 20886a8d) | report object + 64-char digests |
+| Hermes Lab | 14/14, input+output byte-identical | 12/12, input identical, verdicts byte-identical | output_digest scope: with/without trace |
+
+**Hermes Lab (2026-08-14):** FIX-005 input_digest `8cd16124…` + output_digest `3fc70b9d…` byte-identical with Minis — first byte-level third-party confirmation. FIX-006 input_digest `40efe29f…` identical; verdicts+summary byte-identical (their output_digest `deaa774d…` == sha256(JCS({verdicts, summary})) without trace); difference is only output_digest input scope (Minis v0.6 includes trace; Hermes without). This is a profile-scope difference, not a verdict divergence.
 
 **Claim:** Minis-side cross-runtime verification materials are complete and public.
 Cross-runtime PASS conclusion remains UNVERIFIED until 小花花 / Max publish full report
 objects with 64-char digests mapped onto the predicate sets above (P1–P5, Q1–Q6).
+Hermes FIX-005 byte-identical + FIX-006 verdict byte-identical recorded as two independent confirmations; formal PASS upgrade still requires the full report objects from all listed runtimes.
 
 ## How to verify independently
 
 1. Clone: `git clone https://github.com/liulingfei-1/agent-capability-manifest`
-2. Pin: `git checkout <commit>` (latest verified main at time of writing: b35e2df5)
+2. Pin: `git checkout <commit>` (latest verified main at time of writing: 0c5024ac)
 3. Run (zero-dep, Python 3.8+):
    `python3 runners/fix005_runner.py fixtures/FIX-005_aging_and_digest.json`
    `python3 runners/fix006_runner.py fixtures/FIX-006_promote_after_aging_boundary.json`
