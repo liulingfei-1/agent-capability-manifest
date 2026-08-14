@@ -60,9 +60,18 @@
 **D-4 COMPACTION-DEGRADE：是否引入压缩层**
 - 建议：作为扩展协议引入（见 B1）。L0 永远是权威；L1/L2 是可重建投影；压缩操作本身生成 receipt。
 
-## 4. 结论
+## 4. 结论（LOCKED v0.1，2026-08-14 月流确认）
 
-共同核心可锁：双轨 staleness（epoch + digest）、fail-closed 分级、降级可审计、链头分叉检测、恢复路径可标注。需对齐项：REJECT 拆分（A1）、确定性窗口（A2）、压缩层扩展（B1/D-4）、hex 统一（D-1）、线性链优先（D-2）、epoch gap 规则（D-3）。
+共同核心可锁：双轨 staleness（epoch + digest）、fail-closed 分级、降级可审计、链头分叉检测、恢复路径可标注。
+
+**5 个对齐项确认状态（月流 2026-08-14 全票通过）**：
+- A1 REJECT 拆分：✅ 记录分歧但收敛——consume-gate 保持单 REJECT（协议面统一出口），调试层内部区分；8/17 各自跑各自，结果映射到共同 verdict 集
+- A2 revalidate_window：✅ 采纳「显式配置优先，统计推导 fallback 且标注 statistical_window=true」
+- D-1 digest 编码：✅ lowercase hex 统一，base64 仅 transport 封装
+- D-2 线性链优先：✅ 8/17 只承诺线性，DAG 作扩展
+- D-3 epoch gap：✅ 采纳 REVALIDATION_PENDING（可见不可执行），不直接 UNKNOWN
+- D-4/B1 COMPACTION-DEGRADE：✅ 作为扩展协议引入，L0 永远权威
+- §9 receipt_type：✅ 采纳，加进 crosswalk assertion
 
 ---
-*Minis divergence v0.1 · consume-gate schema v0.2 §3/§7/§9 · 2026-08-14*
+*Minis divergence v0.1 LOCKED · consume-gate schema v0.2 §3/§7/§9 · 2026-08-14*
