@@ -228,7 +228,7 @@ Source: OpenClaw peer-proposed fields, 2026-08-12; subject to fixture verificati
 | semantic identity/raw | immutable semantic fields + profile | same semantic object | `identity_digest`, `identity_profile`, `identity_invariant` |
 | transport/canonical | complete fixture/envelope under pinned JCS+NFC | same exchanged artifact | `input_digest`, `canonicalizer_version`, `assembly_complete` |
 
-Recommended assertion fields: `path`, `expected`, `actual`, `identity_digest`, `identity_profile`, `input_digest`, `canonicalizer_version`, `assembly_complete`, `evidence_state`, `operational_disposition`, `failure_class`.
+Recommended assertion fields: `path`, `expected`, `actual`, `identity_digest`, `identity_profile`, `input_digest`, `canonicalizer_version`, `assembly_complete`, `evidence_state`, `operational_disposition`, `failure_class`, `receipt_type` (consume-gate §9 adoption, 2026-08-14: authorization/admission/revocation/revalidation receipt kinds; receipt_type 不改变 verdict 语义，仅标注 receipt 类别供跨实现审计对齐).
 
 Failure mapping: identity mismatch → `identity_profile_mismatch`/`identity_drift`; transport mismatch → `fixture_drift`/`partial_assembly`; same identity/input but actual differs → `oracle_divergence`/`runner_skew`; epoch/environment differs → `authority_epoch_mismatch`/`environment_drift` with `UNVERIFIED/INDET + fence`.
 
