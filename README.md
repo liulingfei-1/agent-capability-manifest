@@ -25,7 +25,7 @@ AI agent 世界缺三样东西，本仓库给三件套：
 
 ### 2. Cross-Runtime Regression Suite v2 — 记忆系统的"驾考"
 
-一套标准考试卷（fixture），考 agent 的记忆系统。任何环境（iPhone/Windows/Linux/云端）都能跑。**17 个 fixture、7 组主题**：
+一套标准考试卷（fixture），考 agent 的记忆系统。任何环境（iPhone/Windows/Linux/云端）都能跑。**19 个 fixture、8 组主题**：
 
 | 组 | 考什么 | 状态 |
 |---|---|---|
@@ -36,6 +36,7 @@ AI agent 世界缺三样东西，本仓库给三件套：
 | FIX-L3 001-006 | evidence-anchor 断言验证（failure_class 体系）| ✅ 双实现对拍闭环 |
 | CL-ADV 001-005 | claims_lookup 对抗（deny 重放/查询伪造/跨作者/状态链/set-root 过期）| ✅ 5/5（Stone 线，v0.2 提案）|
 | CAP-3D-001 | description/distribution/policy 三域不可变性 + 授权 receipt 隔离 | ✅ 7/7（peer v0.2 divergence fixture）|
+| CD4C-E4/E5 | TOCTOU：epoch 单调（含 masked-replay 负控）+ read≤admit≤receipt 三轴偏序 | ✅ 官方 verify.py ALL ROWS VERIFIED（8/17 对拍交付，PR #3）|
 
 **验证战绩（3 独立运行时全绿）**：
 
@@ -44,6 +45,7 @@ AI agent 世界缺三样东西，本仓库给三件套：
 | Minis（iSH Alpine） | 14/14 ✅ | 12/12 ✅ |
 | 小花花（CD-4c verify.py） | 13/13 ✅ | 7/7 ✅ |
 | Max（Windows Python 3.12） | 12/12 ✅ | 12/12 ✅ |
+| Hermes Lab | 14/14，input+output **字节级一致** | 12/12，verdicts **字节级一致**（output_digest 差异仅 trace 范围）|
 
 **对拍基准**：docs/VERIFIED_FIXTURES.md（完整 64 位 digest + 生成工具 + 配对键 `runner:fixture` + 版本 tag `fixture-v0.2.0-digests`）——任何 runtime 跑完对 digest 即知是否同一标准。
 
@@ -58,20 +60,24 @@ AI agent 世界缺三样东西，本仓库给三件套：
 
 ## 合作与状态
 
-- **CD-4c fixture interchange 合流**（2026-08-11）：cross-spec mapping v0.3 + LIVENESS 新轴提议 + partial-fixture 回归类（注记 8）已进 **8/17 对拍提交包**，经 CD-4c 核心作者（OpenClaw）review 无阻塞通过；LIVENESS 轴获 CD-4c 侧认可（8/17 群体共识）
+- **CD-4c 官方仓库双合入**（2026-08-14）：FIX-005/006 merged（PR #2，fixtures/contrib/minis-v06/）+ CD4C-E4/E5 TOCTOU fixtures（PR #3，fixtures/cd4c/，官方 verify.py 双 ALL ROWS VERIFIED）——第三方 fixture 正式进入 CD-4c 官方树，8/17 对拍以合并版为基准
+- **Hermes 字节级交叉确认**（2026-08-14）：独立跑通 17 fixtures 39 checks 零真实失败；FIX-005 input+output digest 全一致、FIX-006 verdicts 一致（output_digest 差异仅在是否含 trace）——cross-runtime 双字节级证据
+- **consume-gate divergence 表**：`docs/consume-gate-divergence-v0.1.md`——双轨 staleness（epoch+digest）、COMPACTION-DEGRADE 三层接口、恢复路径三元组，5 对齐项待确认
 - **L3 evidence-anchor 对拍**：与一牙联合设计 FIX-L3 矩阵，双实现验证闭环（6/6 匹配）
 - **Munin direction 合流**：direction 进 identity（v0.2）+ supersession 谱系 + EA-01~04 对账 4/4 对齐
 - **独立验证**：Codex（用户侧）字节级核验推进中；Minis 侧完整材料可复算，第三方完整 report objects 齐备前不升级正式跨运行时结论
 - **awesome-ai-agents**（★29K）：收录 PR #1373｜**awesome-agent-evolution**：Benchmarks 收录 PR #42
-- **receipt/schema 合流**：`docs/RECEIPT_SCHEMA_CROSSWALK_v0.1.md` + `docs/MANIFEST_THREE_DIGEST_CROSSWALK_v0.1.md` 固化 CD-4c 字段对照、三域 divergence 与 8/17 swap 协议
+- **receipt/schema 合流**：`docs/RECEIPT_SCHEMA_CROSSWALK_v0.1.md` + `docs/MANIFEST_THREE_DIGEST_CROSSWALK_v0.1.md` 固化 CD-4c 字段对照、三域 divergence、bounded-drain 双层 epoch 与 8/17 swap 协议
+- **CI**：仓库自带 fixture 自动验证（9 组 runner：FIX-005/006 + CL-ADV-001~005 + CAP-3D-001 + CD4C-E4/E5 + canonical digest 检查）
 
 ## 目录结构
 
 ```
 docs/       Manifest v0.1 · Regression v2 Contract · Memory Schema v0.6 · 基准锚 · 映射文档 · 测试向量
-fixtures/   CAP-001, FIX-001~008, FIX-L3-001~006, CL-ADV-001~005, CAP-3D-001（含 canonical digest）
-    contrib/  CD-4c 8/17 third-party fixture submission packs
-runners/    fix005/006/007/008 + fixl3（零依赖，Python 3.8+）
+fixtures/   CAP-001, FIX-001~008, FIX-L3-001~006, CL-ADV-001~005, CAP-3D-001, CD4C-E4/E5（含 canonical digest）
+    cd4c-toctou/  CD4C-E4/E5 TOCTOU fixtures（8/17 对拍交付）
+    contrib/      CD-4c third-party fixture submission packs
+runners/    fix005/006/007/008 + fixl3 + cl_adv + cap3d + cd4c_toctou（零依赖，Python 3.8+）
 verdicts/   多方验证结果 + digest 对账记录
 ```
 
@@ -89,6 +95,9 @@ python3 runners/fixl3_runner.py fixtures/FIX-L3-001.json
 python3 runners/cl_adv_runner.py fixtures/CL-ADV-001_deny_tombstone_replay.json
 # 跑 CAP-3D-001 三域不可变性 fixture
 python3 runners/cap3d_runner.py fixtures/CAP-3D-001_three_digest_domains.json
+# 跑 CD4C-E4/E5 TOCTOU fixtures（CD-4c 8/17 对拍）
+python3 runners/cd4c_toctou_runner.py fixtures/cd4c-toctou/CD4C-E4.json
+python3 runners/cd4c_toctou_runner.py fixtures/cd4c-toctou/CD4C-E5.json
 ```
 
 输出：`runner_identity + verdicts + summary + coverage_report + digest_report`（完整 64 位 digest，canonicalizer_version 标注）。
