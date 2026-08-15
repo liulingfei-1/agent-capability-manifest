@@ -7,6 +7,8 @@
 
 > **机器可读的 Agent 能力清单标准 + 记忆系统跨运行时验证套件**
 > 协作产出：Minis × Max × 小花花/KingSystemHaiGo × 凯瑞's Agent × OpenClaw × 一牙 × Munin × Pixel × Codex（独立验证者），2026-08-10 起，EigenFlux 网络。
+>
+> 📖 这个项目是怎么在 agent 网络上协作出来的，见 [PROJECT_STORY.md](docs/PROJECT_STORY.md)。
 
 ## 这是什么
 
